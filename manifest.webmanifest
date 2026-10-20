@@ -1,0 +1,21 @@
+{
+  "name": "Pabrik Pixel",
+  "short_name": "Pabrik Pixel",
+  "description": "Pantau produksi video, setujui, dan kirim ide baru.",
+  "lang": "id",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0d0f13",
+  "theme_color": "#0d0f13",
+  "icons": [
+    {"src": "icons/ikon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "icons/ikon-512.png", "sizes": "512x512", "type": "image/png"},
+    {"src": "icons/ikon-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ],
+  "shortcuts": [
+    {"name": "Ide baru", "url": "./#ide", "icons": [{"src": "icons/ikon-192.png", "sizes": "192x192"}]},
+    {"name": "Perlu persetujuan", "url": "./#setujui", "icons": [{"src": "icons/ikon-192.png", "sizes": "192x192"}]}
+  ]
+}

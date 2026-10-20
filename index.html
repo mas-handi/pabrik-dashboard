@@ -2,17 +2,22 @@
 <html lang="id">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#0d0f13">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pabrik Pixel">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/ikon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <title>Pabrik Pixel</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#0d0f13;--card:#16181e;--card2:#1c1f26;--line:#2a2e37;--txt:#e9ecf2;--mut:#8b93a3;--ok:#3ecf74;--run:#f3b13b;--bad:#ef5b5b;--wait:#5aa2ff;--off:#3a3f4a;--acc:#ffd43b}
-*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--txt);font:14px/1.45 Inter,system-ui,sans-serif}
+*{box-sizing:border-box}html,body{overscroll-behavior-y:contain;-webkit-tap-highlight-color:transparent}html,body{margin:0;background:var(--bg);color:var(--txt);font:14px/1.45 Inter,system-ui,sans-serif}
 button,input,select,textarea{font:inherit;color:inherit}
 header{position:sticky;top:0;z-index:5;background:rgba(13,15,19,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
 .bar{max-width:1240px;margin:0 auto;padding:14px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
@@ -27,7 +32,7 @@ header{position:sticky;top:0;z-index:5;background:rgba(13,15,19,.92);backdrop-fi
 .chip b{color:var(--acc);margin-left:4px}
 main{max-width:1240px;margin:0 auto;padding:18px 16px 60px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:16px}
-@media(max-width:420px){.grid{grid-template-columns:1fr}.logo{font-size:20px}.logo small{display:none}.bar{padding:10px 12px}}
+@media(max-width:420px){.grid{grid-template-columns:1fr}}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;gap:14px;cursor:pointer;transition:.15s}
 .card:hover{border-color:#4a505c;transform:translateY(-1px)}
 .poster{width:92px;height:164px;border-radius:8px;background:#0a0b0e center/cover no-repeat;flex:none;display:grid;place-items:center;color:#555;font-size:22px;image-rendering:pixelated}
@@ -86,6 +91,57 @@ textarea{min-height:120px;resize:vertical}
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#22262f;border:1px solid var(--line);padding:10px 16px;border-radius:10px;z-index:30;display:none;max-width:90vw}
 .runs{font:500 12px 'JetBrains Mono',monospace;color:var(--mut)}
 a{color:var(--wait)}a.btn{color:var(--txt)}
+/* ---------- tampilan aplikasi (HP) */
+.nav,.ptr,#bRef{display:none}
+.btn.ico{padding:8px 11px}
+#bInstall{display:none}
+.inst{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:18px}
+.inst b{display:block;margin-bottom:4px}
+@keyframes up{from{transform:translateY(40px);opacity:0}}
+@keyframes inR{from{transform:translateX(60px);opacity:0}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:760px){
+  body{user-select:none;-webkit-user-select:none}
+  .kv,textarea,input{user-select:text;-webkit-user-select:text}
+  header{padding-top:env(safe-area-inset-top);background:rgba(13,15,19,.94)}
+  .bar{padding:10px 14px 8px;flex-wrap:nowrap;gap:8px}
+  .logo{flex-direction:column;align-items:flex-start;gap:0;font-size:22px;line-height:1.1;min-width:0}
+  .logo small{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:62vw}
+  #bSet,#bNew,.runs{display:none}
+  #bRef{display:inline-block;width:38px;height:38px;padding:0;border-radius:50%;font-size:17px}
+  #bRef.spin{animation:spin .8s linear infinite}
+  .chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding:0 14px 10px}
+  .chips::-webkit-scrollbar{display:none}
+  .chip{flex:none}
+  main{padding:12px 12px calc(98px + env(safe-area-inset-bottom))}
+  .grid{gap:10px}
+  .card{padding:10px;gap:12px;border-radius:16px}
+  .card:hover{transform:none}.card:active{transform:scale(.98);border-color:#4a505c}
+  .poster{width:74px;height:132px;border-radius:10px}
+  .node{width:21px;height:21px;font-size:11px}
+  .nav{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:15;background:rgba(18,20,26,.97);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+  .nav button{flex:1;background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:600;color:var(--mut);padding:4px 0;position:relative;cursor:pointer}
+  .nav .i{font-size:21px;line-height:1;filter:grayscale(1);opacity:.65;transition:.15s}
+  .nav button.on{color:var(--acc)}.nav button.on .i{filter:none;opacity:1;transform:translateY(-1px)}
+  .nav .dot{position:absolute;top:-2px;left:calc(50% + 5px);background:var(--bad);color:#fff;font-size:10px;font-weight:700;border-radius:99px;padding:1px 5px;min-width:17px;line-height:14px}
+  .nav .plus .i{width:56px;height:56px;margin-top:-30px;border-radius:50%;background:var(--acc);color:#1a1400;display:grid;place-items:center;font:700 30px Inter;filter:none;opacity:1;box-shadow:0 6px 20px rgba(255,212,59,.35);border:5px solid var(--bg)}
+  .nav .plus:active .i{transform:scale(.92)}
+  .ptr{display:grid;place-items:center;position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 8px);width:38px;height:38px;margin-left:-19px;border-radius:50%;background:var(--card2);border:1px solid var(--line);z-index:6;font-size:18px;transform:translateY(-70px);transition:transform .2s}
+  .ptr.go{animation:spin .8s linear infinite}
+  /* halaman layar penuh, bukan jendela melayang */
+  .ov{padding:0;align-items:stretch;background:var(--bg);overscroll-behavior:contain}
+  .modal,.modal.sm{max-width:none;border:0;border-radius:0;min-height:100%;padding:calc(66px + env(safe-area-inset-top)) 16px calc(40px + env(safe-area-inset-bottom))}
+  #ovDet.on .modal{animation:inR .26s cubic-bezier(.2,.8,.2,1)}
+  #ovNew.on .modal,#ovSet.on .modal{animation:up .26s cubic-bezier(.2,.8,.2,1)}
+  .x{position:fixed;top:0;left:0;right:0;z-index:25;height:calc(54px + env(safe-area-inset-top));padding:env(safe-area-inset-top) 16px 0;text-align:left;font-size:0;background:rgba(13,15,19,.96);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line);color:var(--txt)}
+  .x::before{content:'‹';font-size:30px;line-height:1;vertical-align:-3px;margin-right:10px;color:var(--acc)}
+  .x::after{content:attr(data-t);font:700 17px Inter}
+  h2{font-size:21px}.modal.sm > h2{display:none}
+  .act .btn{flex:1;padding:12px 14px;text-align:center}
+  .act > div{min-width:100%}
+  .toast{bottom:calc(86px + env(safe-area-inset-bottom));width:max-content;max-width:calc(100vw - 32px)}
+}
+@media(display-mode:standalone){.bar{padding-top:6px}}
 </style>
 </head>
 <body>
@@ -93,11 +149,14 @@ a{color:var(--wait)}a.btn{color:var(--txt)}
   <div class="bar">
     <div class="logo">Pabrik Pixel <small id="sumber">memuat…</small></div>
     <span class="runs" id="runs"></span>
+    <button class="btn" id="bInstall">⬇ Pasang aplikasi</button>
+    <button class="btn ico" id="bRef" aria-label="Segarkan">↻</button>
     <button class="btn" id="bSet">⚙ Pengaturan</button>
     <button class="btn pri" id="bNew">+ Ide baru</button>
   </div>
   <div class="chips" id="chips"></div>
 </header>
+<div class="ptr" id="ptr">↻</div>
 <main>
   <div id="banner"></div>
   <div class="grid" id="grid"></div>
@@ -108,7 +167,7 @@ a{color:var(--wait)}a.btn{color:var(--txt)}
 
 <!-- naskah baru -->
 <div class="ov" id="ovNew"><div class="modal sm">
-  <button class="x" data-close>×</button>
+  <button class="x" data-close data-t="Ide baru">×</button>
   <h2>Ide baru</h2>
   <label>Judul (opsional)</label>
   <input id="nJudul" placeholder="kosongkan, nanti dibuatkan">
@@ -127,7 +186,7 @@ Salah sapa orang di kondangan, dikira teman SMA ternyata mempelai pria."></texta
 
 <!-- pengaturan -->
 <div class="ov" id="ovSet"><div class="modal sm">
-  <button class="x" data-close>×</button>
+  <button class="x" data-close data-t="Pengaturan">×</button>
   <h2>Pengaturan</h2>
   <label>Pemilik repo (username GitHub)</label><input id="sOwner" placeholder="contoh: halloustad">
   <label>Nama repo</label><input id="sRepo" placeholder="pabrik-pixel">
@@ -135,8 +194,17 @@ Salah sapa orang di kondangan, dikira teman SMA ternyata mempelai pria."></texta
   <label>Token GitHub (fine-grained)</label><input id="sToken" type="password" placeholder="github_pat_…">
   <div class="hint">Izin repo ini saja: Contents (read), Issues (read &amp; write), Actions (read &amp; write). Token hanya disimpan di browser ini.</div>
   <div class="act"><button class="btn pri" id="sSimpan">Simpan</button><button class="btn red" id="sHapus">Hapus &amp; pakai mode demo</button></div>
+  <div class="inst" id="instBox"><b>📲 Pasang sebagai aplikasi</b><span class="hint" id="instHint">Android (Chrome): menu ⋮ → <b style="display:inline">Tambahkan ke layar utama</b> / Instal aplikasi. iPhone (Safari): tombol Bagikan → <b style="display:inline">Tambahkan ke Layar Utama</b>. Setelah itu buka dari ikon Pabrik Pixel — tampil layar penuh tanpa bilah alamat.</span>
+  <div class="act"><button class="btn pri" id="sInstall" style="display:none">⬇ Pasang sekarang</button></div></div>
 </div></div>
 <div class="toast" id="toast"></div>
+<nav class="nav" id="nav">
+  <button data-nav="semua"><span class="i">🏭</span>Pabrik</button>
+  <button data-nav="menunggu"><span class="i">👤</span>Setujui<span class="dot" id="dotM" hidden></span></button>
+  <button data-nav="ide" class="plus" aria-label="Ide baru"><span class="i">+</span>Ide</button>
+  <button data-nav="terjadwal"><span class="i">🗓</span>Jadwal</button>
+  <button data-nav="atur"><span class="i">⚙</span>Atur</button>
+</nav>
 
 <script>
 const TAHAP=[['naskah','Naskah'],['kembangkan','Kembangkan'],['animasi','Animasi'],['qc','QC'],['paket','Paket'],['bos','Bos'],['youtube','YouTube']];
@@ -241,6 +309,8 @@ function stages(j){return'<div class="stages">'+TAHAP.map(([k,l])=>{const v=(j.t
 function render(){
   const n={};jobs.forEach(j=>{n[kat(j)]=(n[kat(j)]||0)+1});n.semua=jobs.length;
   $('#chips').innerHTML=FILTER.map(([k,l])=>'<button class="chip '+(filt===k?'on':'')+'" data-f="'+k+'">'+l+(n[k]?'<b>'+n[k]+'</b>':'')+'</button>').join('');
+  document.querySelectorAll('[data-nav]').forEach(b=>b.classList.toggle('on',b.dataset.nav===filt));
+  const dm=$('#dotM'); dm.hidden=!n.menunggu; dm.textContent=n.menunggu||'';
   const list=jobs.filter(j=>filt==='semua'||kat(j)===filt);
   $('#grid').innerHTML=list.length?list.map(j=>'<div class="card" data-id="'+j.id+'"><div class="poster" id="p-'+j.id+'">▶</div><div class="info"><div class="top">'+badge(j)+(j.views!=null?'<span class="views">'+Number(j.views).toLocaleString('id-ID')+' views</span>':'')+'</div><div class="title">'+esc(j.judul)+'</div><div class="sub">'+esc(j.format==='keduanya'?'Short + 16:9':j.format==='panjang'?'Video 16:9':'Short')+' · '+(j.tayang?'tayang '+fmtT(j.tayang):'dibuat '+fmtT(j.dibuat))+'</div>'+pipe(j)+'</div></div>').join(''):'<div class="empty">Belum ada video di sini.</div>';
   list.forEach(async j=>{const u=await media(j,'poster');const el=document.getElementById('p-'+j.id);if(u&&el){el.style.backgroundImage='url('+u+')';el.textContent=''}});
@@ -249,8 +319,8 @@ function render(){
 // ---------- detail
 async function detail(id){
   const j=jobs.find(x=>x.id===id); if(!j) return; openId=id;
-  $('#det').innerHTML='<button class="x" data-close>×</button><div id="dHead"></div><div class="det"><div><div class="tabs" id="dTabs"></div><div class="player" id="dPlayer"></div></div><div id="dBody">memuat…</div></div>';
-  $('#ovDet').classList.add('on'); detailHead(j);
+  $('#det').innerHTML='<button class="x" data-close data-t="Detail video">×</button><div id="dHead"></div><div class="det"><div><div class="tabs" id="dTabs"></div><div class="player" id="dPlayer"></div></div><div id="dBody">memuat…</div></div>';
+  openOv('#ovDet'); detailHead(j);
   const tabs=[['short','Short'],['video','16:9'],['cover','Cover']].filter(([k])=>j.media&&j.media[k]);
   const show=async k=>{$('#dTabs').innerHTML=tabs.map(([x,l])=>'<button class="chip '+(x===k?'on':'')+'" data-tab="'+x+'">'+l+'</button>').join('');
     $('#dPlayer').innerHTML='<div class="sub">memuat media…</div>';const u=await media(j,k);
@@ -315,20 +385,46 @@ async function kirimNaskah(){
   }catch(e){toast('Gagal: '+e.message,6000)} b.disabled=false;
 }
 
-// ---------- events
-function close(s){$(s).classList.remove('on'); if(s==='#ovDet'){openId=null;$('#det').innerHTML=''}}
+// ---------- events (navigasi ala aplikasi: tombol kembali HP menutup halaman)
+function openOv(s){ if(!$(s).classList.contains('on')){ $(s).classList.add('on'); try{history.pushState({ov:s},'')}catch(e){} } document.body.style.overflow='hidden'; $(s).scrollTop=0 }
+function close(s,fromPop){ if(!$(s).classList.contains('on')) return; $(s).classList.remove('on'); if(s==='#ovDet'){openId=null;$('#det').innerHTML=''}
+  if(!document.querySelector('.ov.on')) document.body.style.overflow='';
+  if(!fromPop && history.state && history.state.ov===s) history.back() }
+addEventListener('popstate',()=>document.querySelectorAll('.ov.on').forEach(o=>close('#'+o.id,true)));
+const buzz=()=>{try{navigator.vibrate&&navigator.vibrate(8)}catch(e){}};
 document.addEventListener('click',e=>{
   if(e.target.dataset.f){filt=e.target.dataset.f;render()}
+  const nv=e.target.closest('[data-nav]'); if(nv){ buzz(); const k=nv.dataset.nav;
+    if(k==='ide') return $('#bNew').onclick(); if(k==='atur') return $('#bSet').onclick();
+    filt=k; render(); scrollTo({top:0,behavior:'smooth'}); return }
   const c=e.target.closest('.card'); if(c) detail(c.dataset.id);
   if(e.target.matches('[data-close]')) close('#'+e.target.closest('.ov').id);
   if(e.target.classList.contains('ov')) close('#'+e.target.id);
 });
 document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.ov.on').forEach(o=>close('#'+o.id))});
-$('#bNew').onclick=()=>$('#ovNew').classList.add('on');
-$('#bSet').onclick=()=>{const c=cfg||{};$('#sOwner').value=c.owner||'';$('#sRepo').value=c.repo||'pabrik-pixel';$('#sBranch').value=c.branch||'main';$('#sToken').value=c.token||'';$('#ovSet').classList.add('on')};
+$('#bNew').onclick=()=>openOv('#ovNew');
+$('#bSet').onclick=()=>{const c=cfg||{};$('#sOwner').value=c.owner||'';$('#sRepo').value=c.repo||'pabrik-pixel';$('#sBranch').value=c.branch||'main';$('#sToken').value=c.token||'';openOv('#ovSet')};
 $('#sSimpan').onclick=()=>{cfg={owner:$('#sOwner').value.trim(),repo:$('#sRepo').value.trim(),branch:$('#sBranch').value.trim()||'main',token:$('#sToken').value.trim()};save(cfg);blobs={};close('#ovSet');refresh()};
 $('#sHapus').onclick=()=>{cfg=null;save(null);blobs={};close('#ovSet');refresh()};
 $('#nKirim').onclick=kirimNaskah;
+// segarkan: tombol ↻ dan tarik layar ke bawah
+async function segarkan(){ const b=$('#bRef'), p=$('#ptr'); b.classList.add('spin'); p.classList.add('go'); p.style.transform='translateY(0)';
+  await refresh(); b.classList.remove('spin'); p.classList.remove('go'); p.style.transform=''; }
+$('#bRef').onclick=()=>{buzz();segarkan()};
+let py=null, pd=0;
+addEventListener('touchstart',e=>{ py=(scrollY<=0&&!document.querySelector('.ov.on'))?e.touches[0].clientY:null; pd=0 },{passive:true});
+addEventListener('touchmove',e=>{ if(py==null) return; pd=Math.max(0,e.touches[0].clientY-py); $('#ptr').style.transition='none'; $('#ptr').style.transform='translateY('+(Math.min(pd,110)*0.7-70)+'px) rotate('+pd*3+'deg)' },{passive:true});
+addEventListener('touchend',()=>{ if(py==null) return; $('#ptr').style.transition=''; if(pd>80){buzz();segarkan()} else $('#ptr').style.transform=''; py=null });
+// pasang sebagai aplikasi (PWA)
+let instEv=null; const standalone=matchMedia('(display-mode: standalone)').matches||navigator.standalone;
+addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); instEv=e; if(!standalone){ $('#bInstall').style.display='inline-block'; $('#sInstall').style.display='inline-block' } });
+const pasang=async()=>{ if(!instEv) return toast('Pakai menu browser: “Tambahkan ke layar utama”.'); instEv.prompt(); const r=await instEv.userChoice; if(r.outcome==='accepted'){ $('#bInstall').style.display='none'; $('#sInstall').style.display='none'; toast('Terpasang! Buka dari ikon Pabrik Pixel di layar utama.') } instEv=null };
+$('#bInstall').onclick=pasang; $('#sInstall').onclick=pasang;
+if(standalone) $('#instBox').style.display='none';
+if('serviceWorker' in navigator) addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+// pintasan dari ikon aplikasi
+if(location.hash==='#ide'){ history.replaceState(null,'',location.pathname); setTimeout(()=>openOv('#ovNew'),50) }
+if(location.hash==='#setujui'){ history.replaceState(null,'',location.pathname); filt='menunggu' }
 refresh(); setInterval(()=>{if(!document.hidden)refresh()},20000); setInterval(()=>{if(!document.hidden)tick()},1000);
 </script>
 </body>
