@@ -94,7 +94,7 @@ a{color:var(--wait)}a.btn{color:var(--txt)}
     <div class="logo">Pabrik Pixel <small id="sumber">memuat…</small></div>
     <span class="runs" id="runs"></span>
     <button class="btn" id="bSet">⚙ Pengaturan</button>
-    <button class="btn pri" id="bNew">+ Naskah baru</button>
+    <button class="btn pri" id="bNew">+ Ide baru</button>
   </div>
   <div class="chips" id="chips"></div>
 </header>
@@ -109,23 +109,20 @@ a{color:var(--wait)}a.btn{color:var(--txt)}
 <!-- naskah baru -->
 <div class="ov" id="ovNew"><div class="modal sm">
   <button class="x" data-close>×</button>
-  <h2>Naskah baru</h2>
-  <label>Judul / ide cerita</label>
-  <input id="nJudul" placeholder="contoh: Salah Sapa di Kondangan">
+  <h2>Ide baru</h2>
+  <label>Judul (opsional)</label>
+  <input id="nJudul" placeholder="kosongkan, nanti dibuatkan">
   <label>Format</label>
   <select id="nFormat"><option value="short">Short (9:16, maks 58 dtk)</option><option value="keduanya">Short + video 16:9 (3–7 menit)</option><option value="panjang">Video 16:9 saja (3–7 menit)</option></select>
-  <label>Naskah kasar</label>
-  <textarea id="nNaskah" style="min-height:220px" placeholder="Tokoh: Saya, Pak RT, ...
-Tempat: warung / pasar / jalan / toko / teras masjid / rumah
-Alur:
-1. ...
-2. ...
-Punchline: ...
-Ending: ..."></textarea>
-  <div class="hint">Tulis bebas. Claude akan mengembangkan timing, ekspresi, dan detail visual tanpa mengganti inti leluconmu.</div>
+  <label>Ide cerita</label>
+  <textarea id="nNaskah" style="min-height:120px" placeholder="Cukup satu ide, contoh:
+Salah sapa orang di kondangan, dikira teman SMA ternyata mempelai pria."></textarea>
+  <div class="hint">Cukup satu ide atau satu kalimat — Claude mengembangkan seluruh cerita, punchline, dan ending. Boleh juga menulis naskah lengkap; alur dan punchline-mu akan diikuti.</div>
+  <label>Seri (opsional)</label>
+  <select id="nSeri"><option value="">— tanpa seri —</option><option>Salah Orang!</option><option>Hati-hati Kalau Ngomong</option></select>
   <label>Catatan gaya (opsional)</label>
   <input id="nCatatan" placeholder="contoh: jeda hening lebih lama, bapaknya jangan ngomong">
-  <div class="act"><button class="btn pri" id="nKirim">Kirim ke produksi</button></div>
+  <div class="act"><button class="btn pri" id="nKirim">Kembangkan &amp; produksi</button></div>
 </div></div>
 
 <!-- pengaturan -->
@@ -305,15 +302,16 @@ async function dispatch(wf,inputs){await gh('/actions/workflows/'+wf+'/dispatche
 // ---------- naskah baru
 async function kirimNaskah(){
   if(!live()) return toast('Mode demo: sambungkan repo di ⚙ Pengaturan dulu.');
-  const judul=$('#nJudul').value.trim(), nas=$('#nNaskah').value.trim();
-  if(!judul||!nas) return toast('Judul dan naskah wajib diisi.');
-  const body='Format: '+$('#nFormat').value+'\n\n## Naskah\n'+nas+($('#nCatatan').value.trim()?'\n\n## Catatan gaya\n'+$('#nCatatan').value.trim():'');
+  const nas=$('#nNaskah').value.trim(); const judul=$('#nJudul').value.trim()||nas.split(/[.,\n]/)[0].slice(0,60);
+  if(!nas) return toast('Tulis dulu idenya.');
+  const seri=$('#nSeri').value;
+  const body='Format: '+$('#nFormat').value+(seri?'\nSeri: '+seri:'')+'\n\n## Ide / naskah\n'+nas+($('#nCatatan').value.trim()?'\n\n## Catatan gaya\n'+$('#nCatatan').value.trim():'');
   const b=$('#nKirim'); b.disabled=true;
   try{
     try{await gh('/labels',{method:'POST',body:JSON.stringify({name:'naskah',color:'ffd43b'})})}catch(e){}
     const r=await (await gh('/issues',{method:'POST',body:JSON.stringify({title:judul,body,labels:['naskah']})})).json();
     toast('Naskah #'+r.number+' masuk antrean. Claude mulai mengerjakan (±10–15 menit).',6000);
-    ['#nJudul','#nNaskah','#nCatatan'].forEach(s=>$(s).value=''); close('#ovNew'); setTimeout(refresh,8000);
+    ['#nJudul','#nNaskah','#nCatatan'].forEach(s=>$(s).value=''); $('#nSeri').value=''; close('#ovNew'); setTimeout(refresh,8000);
   }catch(e){toast('Gagal: '+e.message,6000)} b.disabled=false;
 }
 
