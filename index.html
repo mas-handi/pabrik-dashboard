@@ -33,6 +33,19 @@ header{position:sticky;top:0;z-index:5;background:rgba(13,15,19,.92);backdrop-fi
 main{max-width:1240px;margin:0 auto;padding:18px 16px 60px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:16px}
 @media(max-width:420px){.grid{grid-template-columns:1fr}}
+.cal{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;grid-column:1/-1}
+.calh{display:flex;align-items:center;gap:8px;margin-bottom:10px}.calh b{flex:1;font-size:16px;text-transform:capitalize}
+.calh button{background:var(--card2);border:1px solid var(--line);color:var(--txt);border-radius:10px;padding:6px 12px;font-size:15px;cursor:pointer}
+.calg{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.calw{font-size:11px;color:var(--mut);text-align:center;padding-bottom:2px}
+.cald{min-height:74px;background:var(--card2);border:1px solid transparent;border-radius:10px;padding:4px;cursor:pointer;display:flex;flex-direction:column;gap:3px;overflow:hidden}
+.cald.lain{opacity:.35}.cald.kini{border-color:var(--acc)}.cald.pilih{border-color:var(--wait);background:#0f1d33}
+.cald .n{font-size:12px;font-weight:700;color:var(--mut)}.cald.kini .n{color:var(--acc)}
+.ev{font-size:10.5px;line-height:1.25;border-radius:6px;padding:2px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.ev.s{background:#3a2f0b;color:var(--acc)}.ev.l{background:#0f1d33;color:var(--wait)}.ev.ok{background:#0f2a1a;color:var(--ok)}
+.calk{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--mut);margin-top:10px}.calk span{display:flex;gap:5px;align-items:center}.calk i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.calsub{grid-column:1/-1;font-weight:700;margin:6px 2px 0;color:var(--mut);font-size:13px}
+@media(max-width:700px){.cald{min-height:52px;padding:3px}.ev{font-size:0;padding:0;height:6px;border-radius:3px}.cal{padding:10px 8px}}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;gap:14px;cursor:pointer;transition:.15s}
 .card:hover{border-color:#4a505c;transform:translateY(-1px)}
 .poster{width:92px;height:164px;border-radius:8px;background:#0a0b0e center/cover no-repeat;flex:none;display:grid;place-items:center;color:#555;font-size:22px;image-rendering:pixelated}
@@ -359,9 +372,33 @@ function render(){
   document.querySelectorAll('[data-nav]').forEach(b=>b.classList.toggle('on',b.dataset.nav===filt));
   const dm=$('#dotM'); dm.hidden=!n.menunggu; dm.textContent=n.menunggu||'';
   const list=jobs.filter(j=>filt==='semua'||kat(j)===filt);
-  if(filt==='terjadwal') list.sort((a,b)=>String(a.tayang||'9').localeCompare(String(b.tayang||'9')));
+  if(filt==='terjadwal'){ kalender(); return }
   $('#grid').innerHTML=list.length?list.map(j=>'<div class="card" data-id="'+j.id+'"><div class="poster" id="p-'+j.id+'">▶</div><div class="info"><div class="top">'+badge(j)+(j.views!=null?'<span class="views">'+Number(j.views).toLocaleString('id-ID')+' views</span>':'')+'</div><div class="title">'+esc(j.judul)+'</div><div class="sub">'+esc(j.format==='keduanya'?'Short + 16:9':j.format==='panjang'?'Video 16:9':'Short')+' · '+(j.tayang?'tayang '+fmtT(j.tayang):'dibuat '+fmtT(j.dibuat))+'</div>'+pipe(j)+'</div></div>').join(''):'<div class="empty">Belum ada video di sini.</div>';
   list.forEach(async j=>{const u=await media(j,'poster');const el=document.getElementById('p-'+j.id);if(u&&el){el.style.backgroundImage='url('+u+')';el.textContent=''}});
+}
+
+// ---------- kalender jadwal tayang
+let calM=null, calSel=null;
+const ymd=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+function kartu(j){return '<div class="card" data-id="'+j.id+'"><div class="poster" id="p-'+j.id+'">▶</div><div class="info"><div class="top">'+badge(j)+(j.views!=null?'<span class="views">'+Number(j.views).toLocaleString('id-ID')+' views</span>':'')+'</div><div class="title">'+esc(j.judul)+'</div><div class="sub">'+esc(j.format==='keduanya'?'Short + 16:9':j.format==='panjang'?'Video 16:9':'Short')+' · '+(j.tayang?'tayang '+fmtT(j.tayang):'dibuat '+fmtT(j.dibuat))+'</div>'+pipe(j)+'</div></div>'}
+function kalender(){
+  const now=new Date(); if(!calM) calM=new Date(now.getFullYear(),now.getMonth(),1); if(!calSel) calSel=ymd(now);
+  const ada=jobs.filter(j=>j.tayang&&(kat(j)==='terjadwal'||kat(j)==='tayang')), per={};
+  ada.forEach(j=>{const k=ymd(new Date(j.tayang));(per[k]=per[k]||[]).push(j)});
+  Object.values(per).forEach(a=>a.sort((x,y)=>String(x.tayang).localeCompare(String(y.tayang))));
+  const y=calM.getFullYear(), m=calM.getMonth(), awal=(new Date(y,m,1).getDay()+6)%7, mulai=new Date(y,m,1-awal);
+  let h='<div class="cal"><div class="calh"><button data-cal="prev" aria-label="bulan sebelumnya">‹</button><b>'+calM.toLocaleString('id-ID',{month:'long',year:'numeric'})+'</b><button data-cal="today">Hari ini</button><button data-cal="next" aria-label="bulan berikutnya">›</button></div><div class="calg">'+
+    ['Sen','Sel','Rab','Kam','Jum','Sab','Min'].map(w=>'<div class="calw">'+w+'</div>').join('');
+  for(let i=0;i<42;i++){ const d=new Date(mulai); d.setDate(mulai.getDate()+i); if(i>=35&&d.getMonth()!==m) break; const k=ymd(d), ev=per[k]||[];
+    h+='<div class="cald'+(d.getMonth()!==m?' lain':'')+(k===ymd(now)?' kini':'')+(k===calSel?' pilih':'')+'" data-day="'+k+'"><span class="n">'+d.getDate()+'</span>'+
+      ev.map(j=>{const pj=j.format!=='short', ok=kat(j)==='tayang'; return '<div class="ev '+(ok?'ok':pj?'l':'s')+'" title="'+esc(j.judul)+'">'+new Date(j.tayang).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})+' '+(pj?'16:9':'Short')+'</div>'}).join('')+'</div>' }
+  h+='</div><div class="calk"><span><i style="background:var(--acc)"></i>Short terjadwal</span><span><i style="background:var(--wait)"></i>Video 16:9 terjadwal</span><span><i style="background:var(--ok)"></i>Sudah tayang</span></div></div>';
+  const pilih=per[calSel]||[], tgl=new Date(calSel+'T00:00').toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long'});
+  h+='<div class="calsub">'+tgl+'</div>'+(pilih.length?pilih.map(kartu).join(''):'<div class="empty" style="grid-column:1/-1;padding:18px">Tidak ada video di tanggal ini — ketuk tanggal bertanda untuk melihat videonya.</div>');
+  const draf=jobs.filter(j=>kat(j)==='terjadwal'&&!j.tayang);
+  if(draf.length) h+='<div class="calsub">Draf private (belum ada jam tayang)</div>'+draf.map(kartu).join('');
+  $('#grid').innerHTML=h;
+  [...pilih,...draf].forEach(async j=>{const u=await media(j,'poster');const el=document.getElementById('p-'+j.id);if(u&&el){el.style.backgroundImage='url('+u+')';el.textContent=''}});
 }
 
 // ---------- detail
@@ -508,6 +545,8 @@ document.addEventListener('click',e=>{
   const nv=e.target.closest('[data-nav]'); if(nv){ buzz(); const k=nv.dataset.nav;
     if(k==='ide') return $('#bNew').onclick(); if(k==='atur') return $('#bSet').onclick();
     filt=k; render(); scrollTo({top:0,behavior:'smooth'}); return }
+  const cb=e.target.closest('[data-cal]'); if(cb){ const a=cb.dataset.cal, n=new Date(); if(a==='today'){calM=new Date(n.getFullYear(),n.getMonth(),1);calSel=ymd(n)} else calM=new Date(calM.getFullYear(),calM.getMonth()+(a==='next'?1:-1),1); kalender(); return }
+  const cd=e.target.closest('[data-day]'); if(cd){ calSel=cd.dataset.day; buzz(); kalender(); return }
   const c=e.target.closest('.card'); if(c) detail(c.dataset.id);
   if(e.target.matches('[data-close]')) close('#'+e.target.closest('.ov').id);
   if(e.target.classList.contains('ov')) close('#'+e.target.id);
