@@ -1,6 +1,6 @@
 // Service worker Pabrik Pixel: menyimpan "cangkang" aplikasi agar terbuka cepat & tetap tampil saat sinyal hilang.
 // Data GitHub (api.github.com) TIDAK pernah disimpan di sini.
-const V = 'pabrik-v4';
+const V = 'pabrik-v5';
 const SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icons/ikon-192.png', 'icons/ikon-512.png', 'icons/apple-touch-icon.png', 'vendor/sealedbox.js'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(V).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => {
