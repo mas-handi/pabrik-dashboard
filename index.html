@@ -68,6 +68,8 @@ main{max-width:1240px;margin:0 auto;padding:18px 16px 60px}
 .st.-{color:#5c6270}
 @keyframes p{50%{opacity:.35}}
 .empty{color:var(--mut);text-align:center;padding:60px 0}
+.banner,.kv,.hint,.sub{overflow-wrap:anywhere}
+html,body{overflow-x:hidden;max-width:100%}
 .banner{background:#2b2108;border:1px solid #7a5a17;color:#f6d58b;padding:10px 14px;border-radius:10px;margin-bottom:16px;font-size:13px}
 /* modal */
 .ov{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;z-index:20;align-items:flex-start;justify-content:center;overflow:auto;padding:30px 12px}
@@ -88,7 +90,7 @@ textarea{min-height:120px;resize:vertical}
 .qc li{margin:2px 0}.qc .no{color:var(--bad)}.qc .yes{color:var(--ok)}
 .act{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;align-items:end}
 .act > div{flex:1;min-width:200px}
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#22262f;border:1px solid var(--line);padding:10px 16px;border-radius:10px;z-index:30;display:none;max-width:90vw}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#22262f;border:1px solid var(--line);padding:10px 16px;border-radius:10px;z-index:9999;display:none;max-width:90vw}
 .runs{font:500 12px 'JetBrains Mono',monospace;color:var(--mut)}
 a{color:var(--wait)}a.btn{color:var(--txt)}
 /* ---------- tampilan aplikasi (HP) */
@@ -97,6 +99,10 @@ a{color:var(--wait)}a.btn{color:var(--txt)}
 #bInstall{display:none}
 .inst{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:18px}
 .inst b{display:block;margin-bottom:4px}
+.steps{margin:0;padding-left:20px}.steps li{margin:8px 0;line-height:1.5}.steps a{font-weight:600}
+code.u{display:block;background:#0f1116;border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin:6px 0;font:12px 'JetBrains Mono',monospace;word-break:break-all;user-select:all;-webkit-user-select:all}
+.ytc{display:flex;gap:12px;align-items:center}.ytc img{width:48px;height:48px;border-radius:50%}
+.ok{color:var(--ok)}.no{color:var(--bad)}
 @keyframes up{from{transform:translateY(40px);opacity:0}}
 @keyframes inR{from{transform:translateX(60px);opacity:0}}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -194,8 +200,40 @@ Salah sapa orang di kondangan, dikira teman SMA ternyata mempelai pria."></texta
   <label>Token GitHub (fine-grained)</label><input id="sToken" type="password" placeholder="github_pat_…">
   <div class="hint">Izin repo ini saja: Contents (read), Issues (read &amp; write), Actions (read &amp; write). Token hanya disimpan di browser ini.</div>
   <div class="act"><button class="btn pri" id="sSimpan">Simpan</button><button class="btn red" id="sHapus">Hapus &amp; pakai mode demo</button></div>
+  <div class="inst"><b>📺 YouTube</b><span class="hint" id="ytMini">Hubungkan kanal agar video bisa diupload & dijadwalkan otomatis.</span>
+  <div class="act"><button class="btn pri" id="sYT">Atur koneksi YouTube</button></div></div>
   <div class="inst" id="instBox"><b>📲 Pasang sebagai aplikasi</b><span class="hint" id="instHint">Android (Chrome): menu ⋮ → <b style="display:inline">Tambahkan ke layar utama</b> / Instal aplikasi. iPhone (Safari): tombol Bagikan → <b style="display:inline">Tambahkan ke Layar Utama</b>. Setelah itu buka dari ikon Pabrik Pixel — tampil layar penuh tanpa bilah alamat.</span>
   <div class="act"><button class="btn pri" id="sInstall" style="display:none">⬇ Pasang sekarang</button></div></div>
+</div></div>
+<!-- YouTube -->
+<div class="ov" id="ovYT"><div class="modal sm">
+  <button class="x" data-close data-t="YouTube">×</button>
+  <h2>Koneksi YouTube</h2>
+  <div class="kv" id="ytStatus">memeriksa…</div>
+  <h3>1 · Siapkan Google Cloud (sekali saja)</h3>
+  <ol class="steps">
+    <li><a target="_blank" href="https://console.cloud.google.com/projectcreate">Buat project</a> baru, misalnya “Pabrik Pixel”.</li>
+    <li><a target="_blank" href="https://console.cloud.google.com/apis/library/youtube.googleapis.com">Aktifkan YouTube Data API v3</a> (tombol <b>Enable</b>).</li>
+    <li><a target="_blank" href="https://console.cloud.google.com/auth/overview">Google Auth Platform</a> → <b>Get started</b>: isi nama aplikasi &amp; emailmu, pilih <b>External</b>.</li>
+    <li><a target="_blank" href="https://console.cloud.google.com/auth/audience">Audience</a> → <b>Publish app</b> (status <b>In production</b>). Kalau dibiarkan “Testing”, koneksi putus tiap 7 hari.</li>
+    <li><a target="_blank" href="https://console.cloud.google.com/auth/clients/create">Buat OAuth client</a>: tipe <b>Web application</b>, lalu di <b>Authorized redirect URIs</b> tambahkan alamat ini persis:
+      <code class="u" id="ytRedir"></code><button class="btn" id="ytCopy">Salin alamat</button></li>
+    <li>Salin <b>Client ID</b> dan <b>Client secret</b> yang muncul ke kolom di bawah.</li>
+  </ol>
+  <h3>2 · Hubungkan</h3>
+  <label>Client ID</label><input id="ytCid" placeholder="…apps.googleusercontent.com" autocomplete="off">
+  <label>Client secret</label><input id="ytSec" type="password" placeholder="GOCSPX-…" autocomplete="off">
+  <div class="hint">Kunci dikirim terenkripsi langsung ke <b>GitHub Secrets</b> repo pabrik-pixel dan tidak disimpan di HP ini.
+    Token GitHub di Pengaturan perlu izin tambahan <b>Secrets: Read and write</b>.
+    Saat Google menampilkan “Google hasn’t verified this app”, ketuk <b>Advanced → Go to … (unsafe)</b> — itu aplikasimu sendiri.</div>
+  <div class="act"><button class="btn pri" id="ytGo">🔗 Hubungkan akun YouTube</button></div>
+  <h3>3 · Uji dari pabrik</h3>
+  <div class="hint">Menjalankan pengecekan di GitHub dengan kunci yang tersimpan (±1 menit), hasilnya muncul di kotak status di atas.</div>
+  <div class="act"><button class="btn" id="ytTest">▶ Uji koneksi</button></div>
+  <h3>4 · Audit API (agar video tidak terkunci private)</h3>
+  <div class="hint">Video yang diupload lewat API dari project yang belum diaudit Google akan terkunci <b>private</b>.
+    Ajukan sekali lewat <a target="_blank" href="https://support.google.com/youtube/contact/yt_api_form">formulir audit YouTube API</a> (gratis, beberapa minggu).
+    Sambil menunggu, pilih “Draf private” saat menyetujui video lalu jadwalkan di YouTube Studio.</div>
 </div></div>
 <div class="toast" id="toast"></div>
 <nav class="nav" id="nav">
@@ -389,11 +427,12 @@ async function kirimNaskah(){
 }
 
 // ---------- events (navigasi ala aplikasi: tombol kembali HP menutup halaman)
-function openOv(s){ if(!$(s).classList.contains('on')){ $(s).classList.add('on'); try{history.pushState({ov:s},'')}catch(e){} } document.body.style.overflow='hidden'; $(s).scrollTop=0 }
+let ovZ=20;
+function openOv(s){ if(!$(s).classList.contains('on')){ $(s).classList.add('on'); $(s).dataset.z=++ovZ; $(s).style.zIndex=ovZ; try{history.pushState({ov:s},'')}catch(e){} } document.body.style.overflow='hidden'; $(s).scrollTop=0 }
 function close(s,fromPop){ if(!$(s).classList.contains('on')) return; $(s).classList.remove('on'); if(s==='#ovDet'){openId=null;$('#det').innerHTML=''}
   if(!document.querySelector('.ov.on')) document.body.style.overflow='';
   if(!fromPop && history.state && history.state.ov===s) history.back() }
-addEventListener('popstate',()=>document.querySelectorAll('.ov.on').forEach(o=>close('#'+o.id,true)));
+addEventListener('popstate',()=>{ const on=[...document.querySelectorAll('.ov.on')]; const top=on.sort((a,b)=>(+b.dataset.z||0)-(+a.dataset.z||0))[0]; if(top) close('#'+top.id,true) });
 const buzz=()=>{try{navigator.vibrate&&navigator.vibrate(8)}catch(e){}};
 document.addEventListener('click',e=>{
   if(e.target.dataset.f){filt=e.target.dataset.f;render()}
@@ -410,6 +449,61 @@ $('#bSet').onclick=()=>{const c=cfg||{};$('#sOwner').value=c.owner||'';$('#sRepo
 $('#sSimpan').onclick=()=>{cfg={owner:$('#sOwner').value.trim(),repo:$('#sRepo').value.trim(),branch:$('#sBranch').value.trim()||'main',token:$('#sToken').value.trim()};save(cfg);blobs={};close('#ovSet');refresh()};
 $('#sHapus').onclick=()=>{cfg=null;save(null);blobs={};close('#ovSet');refresh()};
 $('#nKirim').onclick=kirimNaskah;
+// ---------- YouTube: OAuth di HP -> GitHub Secrets terenkripsi
+const REDIR=location.origin+location.pathname;
+const YT_SCOPE='https://www.googleapis.com/auth/youtube.upload https://www.googleapis.com/auth/youtube.readonly';
+const b64d=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0)), b64e=u=>{let s='';u.forEach(x=>s+=String.fromCharCode(x));return btoa(s)};
+function loadSealed(){return window.sealedBox?Promise.resolve():new Promise((ok,no)=>{const s=document.createElement('script');s.src='vendor/sealedbox.js';s.onload=ok;s.onerror=()=>no(new Error('gagal memuat enkripsi'));document.head.appendChild(s)})}
+async function ytStatus(extra){
+  const el=$('#ytStatus'); if(!live()){ el.innerHTML='Sambungkan repo GitHub dulu di <b>Pengaturan</b>.'; return }
+  let h=extra||'';
+  try{ const r=await (await gh('/actions/secrets')).json(); const nm=r.secrets.map(x=>x.name); const t=r.secrets.find(x=>x.name==='YT_REFRESH_TOKEN');
+    const ok=['YT_CLIENT_ID','YT_CLIENT_SECRET','YT_REFRESH_TOKEN'].every(n=>nm.includes(n));
+    h+= ok?'<div class="ok">✅ Kunci YouTube tersimpan di GitHub · '+fmtT(t.updated_at)+'</div>':'<div>⚪ Kunci YouTube belum ada di GitHub</div>';
+    $('#ytMini').textContent= ok?'✅ Kunci tersimpan. Buka untuk menguji atau menghubungkan ulang.':'Belum terhubung.' }
+  catch(e){ h+='<div class="no">⚠️ Token GitHub belum punya izin <b>Secrets: Read and write</b>. Tambahkan izinnya di github.com → Settings → Developer settings → Fine-grained tokens, lalu coba lagi.</div>' }
+  try{ const y=await raw('data/youtube.json'); h+= y.ok?'<div class="ok">📺 Uji terakhir berhasil: <b>'+esc(y.kanal)+'</b> · '+Number(y.subscriber).toLocaleString('id-ID')+' subscriber · '+fmtT(y.cek)+'</div>'
+      :'<div class="no">❌ Uji terakhir gagal ('+fmtT(y.cek)+'): '+esc(y.error)+'</div>' }catch(e){ h+='<div class="hint">Belum pernah diuji dari pabrik.</div>' }
+  el.innerHTML=h }
+function ytOpen(){ $('#ytRedir').textContent=REDIR; openOv('#ovYT'); ytStatus() }
+$('#sYT').onclick=ytOpen;
+$('#ytCopy').onclick=async()=>{ try{await navigator.clipboard.writeText(REDIR);toast('Alamat disalin.')}catch(e){toast('Tahan lalu salin alamatnya secara manual.')} };
+$('#ytGo').onclick=()=>{
+  if(!live()) return toast('Sambungkan repo GitHub dulu di Pengaturan.');
+  const cid=$('#ytCid').value.trim(), sec=$('#ytSec').value.trim();
+  if(!/\.apps\.googleusercontent\.com$/.test(cid)) return toast('Client ID harus berakhiran .apps.googleusercontent.com');
+  if(sec.length<10) return toast('Isi Client secret.');
+  const state=Array.from(crypto.getRandomValues(new Uint8Array(16)),b=>b.toString(16).padStart(2,'0')).join('');
+  try{ localStorage.setItem('ytOauth',JSON.stringify({cid,sec,state,exp:Date.now()+15*60e3})) }catch(e){}
+  location.href='https://accounts.google.com/o/oauth2/v2/auth?'+new URLSearchParams({client_id:cid,redirect_uri:REDIR,response_type:'code',scope:YT_SCOPE,access_type:'offline',prompt:'consent',state});
+};
+$('#ytTest').onclick=async()=>{ if(!live()) return toast('Sambungkan repo GitHub dulu.'); const b=$('#ytTest'); b.disabled=true;
+  try{ await gh('/actions/workflows/cek-youtube.yml/dispatches',{method:'POST',body:JSON.stringify({ref:cfg.branch||'main'})}); toast('Uji berjalan… hasil muncul dalam ±1–2 menit.',5000);
+    setTimeout(()=>ytStatus(),70000); setTimeout(()=>ytStatus(),130000) }catch(e){ toast('Gagal: '+e.message,6000) } b.disabled=false };
+async function ytCallback(q){
+  let s=null; try{ s=JSON.parse(localStorage.getItem('ytOauth')||'null'); localStorage.removeItem('ytOauth') }catch(e){}
+  history.replaceState(null,'',REDIR); ytOpen();
+  const say=m=>{$('#ytStatus').innerHTML=m};
+  if(q.get('error')) return say('<div class="no">Dibatalkan: '+esc(q.get('error'))+'</div>');
+  if(!s||s.state!==q.get('state')||Date.now()>s.exp) return say('<div class="no">Sesi kedaluwarsa atau tidak cocok. Ulangi langkah 2 (kalau memakai aplikasi terpasang di iPhone, lakukan langkah ini dari Safari).</div>');
+  try{
+    say('⏳ Menukar kode dengan Google…');
+    const r=await fetch('https://oauth2.googleapis.com/token',{method:'POST',body:new URLSearchParams({code:q.get('code'),client_id:s.cid,client_secret:s.sec,redirect_uri:REDIR,grant_type:'authorization_code'})});
+    const t=await r.json(); if(!t.refresh_token) throw new Error(t.error_description||t.error||'Google tidak memberi refresh token. Cabut akses aplikasi di myaccount.google.com/permissions lalu ulangi.');
+    say('⏳ Membaca kanal YouTube…');
+    const ch=await (await fetch('https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&mine=true',{headers:{Authorization:'Bearer '+t.access_token}})).json();
+    if(ch.error) throw new Error(ch.error.message); const c=(ch.items||[])[0]; if(!c) throw new Error('Akun Google ini belum punya kanal YouTube.');
+    say('⏳ Menyimpan kunci terenkripsi ke GitHub…');
+    await loadSealed(); const pk=await (await gh('/actions/secrets/public-key')).json(), key=b64d(pk.key);
+    for(const [n,v] of [['YT_CLIENT_ID',s.cid],['YT_CLIENT_SECRET',s.sec],['YT_REFRESH_TOKEN',t.refresh_token]])
+      await gh('/actions/secrets/'+n,{method:'PUT',body:JSON.stringify({encrypted_value:b64e(sealedBox(new TextEncoder().encode(v),key)),key_id:pk.key_id})});
+    buzz(); toast('YouTube terhubung!',4000);
+    ytStatus('<div class="ytc"><img src="'+esc(((c.snippet.thumbnails||{}).default||{}).url||'')+'"><div><b>'+esc(c.snippet.title)+'</b><br><span class="hint">'+Number(c.statistics.subscriberCount||0).toLocaleString('id-ID')+' subscriber · terhubung sekarang</span></div></div>');
+    $('#ytCid').value=''; $('#ytSec').value='';
+    try{ await gh('/actions/workflows/cek-youtube.yml/dispatches',{method:'POST',body:JSON.stringify({ref:cfg.branch||'main'})}) }catch(e){}
+  }catch(e){ say('<div class="no">❌ '+esc(e.message)+'</div><div class="hint">Cek: redirect URI sama persis, YouTube Data API aktif, dan izin Secrets di token GitHub.</div>') }
+}
+{ const q=new URLSearchParams(location.search); if(q.get('code')||q.get('error')) ytCallback(q) }
 // segarkan: tombol ↻ dan tarik layar ke bawah
 async function segarkan(){ const b=$('#bRef'), p=$('#ptr'); b.classList.add('spin'); p.classList.add('go'); p.style.transform='translateY(0)';
   await refresh(); b.classList.remove('spin'); p.classList.remove('go'); p.style.transform=''; }
