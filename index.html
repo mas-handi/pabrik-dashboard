@@ -240,7 +240,9 @@ a{color:var(--wait)}
   #maskot img{height:48px}#maskot span{font-size:11px;margin-bottom:18px;max-width:42vw;white-space:normal}
   #bRef{border-radius:0}
   .card{border-radius:0}.poster{border-radius:0}.node{width:22px;height:22px}
-  .nav{background:var(--ink);backdrop-filter:none;-webkit-backdrop-filter:none;border-top:4px solid var(--or)}
+  .nav{background:var(--ink);backdrop-filter:none;-webkit-backdrop-filter:none;border-top:4px solid var(--or);z-index:40}
+  main{padding-bottom:calc(130px + env(safe-area-inset-bottom))}
+  .modal,.modal.sm{padding-bottom:calc(130px + env(safe-area-inset-bottom))}
   .nav button{font:7px/1.4 var(--px);color:#8f80b5;gap:6px}
   .nav button.on{color:var(--acc)}
   .nav .plus .i{border-radius:0;background:var(--acc);color:var(--ink);font:20px var(--px);border:4px solid var(--ink);box-shadow:4px 4px 0 #000,inset -4px -4px 0 #00000030;width:52px;height:52px;margin-top:-28px}
@@ -380,7 +382,7 @@ async function media(job,key){
   try{blobs[k]=await raw(p,'blob')}catch(e){blobs[k]=null} return blobs[k];
 }
 async function refresh(){
-  try{const d=await raw('data/jobs.json');jobs=d.jobs||[];$('#sumber').textContent=(live()?cfg.owner+'/'+cfg.repo:'mode demo')+' · diperbarui '+fmtT(d.diperbarui);$('#banner').innerHTML=live()?'':'<div class="banner">Mode demo: menampilkan data contoh. Buka ⚙ Pengaturan untuk menyambungkan repo GitHub-mu.</div>'}
+  try{const d=await raw('data/jobs.json');jobs=d.jobs||[];$('#sumber').textContent=(live()?'':'mode demo · ')+'diperbarui '+fmtT(d.diperbarui);$('#banner').innerHTML=live()?'':'<div class="banner">Mode demo: menampilkan data contoh. Buka ⚙ Pengaturan untuk menyambungkan repo GitHub-mu.</div>'}
   catch(e){ jobs=[]; $('#banner').innerHTML = live() ? '<div class="banner">Gagal memuat data: '+esc(e.message)+'. Cek pengaturan repo dan token.</div>'
       : '<div class="banner">Belum tersambung. Buka <b>⚙ Pengaturan</b> lalu isi pemilik repo, nama repo, dan token GitHub-mu.</div>'; $('#sumber').textContent = live()?'':'belum tersambung' }
   learn(); render(); if(live()) { runs(); liveRuns(); }
@@ -632,7 +634,7 @@ async function kirimNaskah(){
 // ---------- events (navigasi ala aplikasi: tombol kembali HP menutup halaman)
 let ovZ=20;
 function openOv(s){ if(!$(s).classList.contains('on')){ $(s).classList.add('on'); $(s).dataset.z=++ovZ; $(s).style.zIndex=ovZ; try{history.pushState({ov:s},'')}catch(e){} } document.body.style.overflow='hidden'; $(s).scrollTop=0 }
-function close(s,fromPop){ if(!$(s).classList.contains('on')) return; $(s).classList.remove('on'); if(s==='#ovDet'){openId=null;$('#det').innerHTML=''}
+function close(s,fromPop){ if(!$(s).classList.contains('on')) return; $(s).classList.remove('on'); if(!document.querySelector('.ov.on')) document.querySelectorAll('[data-nav]').forEach(b=>b.classList.toggle('on',b.dataset.nav===filt)); if(s==='#ovDet'){openId=null;$('#det').innerHTML=''}
   if(!document.querySelector('.ov.on')) document.body.style.overflow='';
   if(!fromPop && history.state && history.state.ov===s) history.back() }
 addEventListener('popstate',()=>{ const on=[...document.querySelectorAll('.ov.on')]; const top=on.sort((a,b)=>(+b.dataset.z||0)-(+a.dataset.z||0))[0]; if(top) close('#'+top.id,true) });
@@ -640,7 +642,9 @@ const buzz=()=>{try{navigator.vibrate&&navigator.vibrate(8)}catch(e){}};
 document.addEventListener('click',e=>{
   if(e.target.dataset.f){filt=e.target.dataset.f;render()}
   const nv=e.target.closest('[data-nav]'); if(nv){ buzz(); const k=nv.dataset.nav;
-    if(k==='ide') return $('#bNew').onclick(); if(k==='atur') return $('#bSet').onclick();
+    document.querySelectorAll('.ov.on').forEach(o=>{ if(!((k==='ide'&&o.id==='ovNew')||(k==='atur'&&o.id==='ovSet'))) close('#'+o.id,true) });
+    document.body.style.overflow=document.querySelector('.ov.on')?'hidden':'';
+    if(k==='ide'||k==='atur'){ document.querySelectorAll('[data-nav]').forEach(b=>b.classList.toggle('on',b.dataset.nav===k)); return k==='ide'?$('#bNew').onclick():$('#bSet').onclick() }
     filt=k; render(); scrollTo({top:0,behavior:'smooth'}); return }
   const cb=e.target.closest('[data-cal]'); if(cb){ const a=cb.dataset.cal, n=new Date(); if(a==='today'){calM=new Date(n.getFullYear(),n.getMonth(),1);calSel=ymd(n);calPilihSendiri=true} else { calM=new Date(calM.getFullYear(),calM.getMonth()+(a==='next'?1:-1),1); calPilihSendiri=true } kalender(); return }
   const cd=e.target.closest('[data-day]'); if(cd){ calSel=cd.dataset.day; calPilihSendiri=true; buzz(); kalender(); return }
