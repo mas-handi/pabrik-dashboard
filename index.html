@@ -187,6 +187,7 @@ Salah sapa orang di kondangan, dikira teman SMA ternyata mempelai pria."></texta
   <select id="nSeri"><option value="">— tanpa seri —</option><option>Salah Orang!</option><option>Hati-hati Kalau Ngomong</option></select>
   <label>Catatan gaya (opsional)</label>
   <input id="nCatatan" placeholder="contoh: jeda hening lebih lama, bapaknya jangan ngomong">
+  <label>Gambar latar baru (opsional)</label><input type="file" id="nLatar" multiple accept=".png,.jpg,.jpeg,.webp"><div class="hint">Latar dari AI lain. Beri nama berkas sesuai tempatnya (mis. <b>kantor.png</b>, <b>kondangan.jpg</b>) — nama itu jadi nama lokasi.</div>
   <div class="act"><button class="btn pri" id="nKirim">Kembangkan &amp; produksi</button></div>
 </div></div>
 
@@ -402,7 +403,7 @@ function actions(j){
   if(k==='menunggu') return '<h3>Keputusanmu</h3><div class="act"><div><label>Jadwal tayang</label><select id="aMode" onchange="document.getElementById(\'aWaktuBox\').style.display=this.value===\'manual\'?\'block\':\'none\'"><option value="auto">🎲 Otomatis (disarankan)</option><option value="manual">🕒 Pilih jam sendiri</option><option value="draf">📁 Draf private (atur di YouTube Studio)</option></select>'+
     '<div class="hint">Otomatis: hari kosong berikutnya, jam acak di jendela ramai (siang, pulang kerja, malam), makin pintar mengikuti views.</div>'+
     '<div id="aWaktuBox" style="display:none"><label>Jam tayang (WIB)</label><input type="datetime-local" id="aWaktu" value="'+nextSlot()+'"></div></div><button class="btn grn" data-a="setujui">✅ Setujui &amp; jadwalkan</button></div>'+
-    '<div class="act"><div><label>Minta revisi</label><textarea id="aRev" style="min-height:70px" placeholder="contoh: jeda heningnya lebih lama, tambahkan bapaknya menghela napas"></textarea><label style="margin-top:8px">Atau unggah dokumenmu (Word, PDF, teks, foto)</label><input type="file" id="fRev" accept=".docx,.pdf,.md,.txt,.png,.jpg,.jpeg,.webp"><div class="hint">Mis. storyboard versi editanmu — Claude memakainya sebagai acuan utama. Maks 20 MB.</div></div></div><div class="act"><button class="btn" data-a="revisi">✏️ Kirim revisi</button><button class="btn red" data-a="tolak">Tolak</button></div>';
+    '<div class="act"><div><label>Minta revisi</label><textarea id="aRev" style="min-height:70px" placeholder="contoh: jeda heningnya lebih lama, tambahkan bapaknya menghela napas"></textarea><label style="margin-top:8px">Atau unggah dokumenmu (Word, PDF, teks, foto)</label><input type="file" id="fRev" accept=".docx,.pdf,.md,.txt,.png,.jpg,.jpeg,.webp"><div class="hint">Mis. storyboard versi editanmu — Claude memakainya sebagai acuan utama. Maks 20 MB.</div><label style="margin-top:8px">Gambar latar baru (opsional)</label><input type="file" id="lRev" multiple accept=".png,.jpg,.jpeg,.webp"><div class="hint">Latar dari AI lain. Beri nama berkas sesuai tempatnya (mis. <b>kantor.png</b>, <b>kondangan.jpg</b>) — nama itu jadi nama lokasi.</div></div></div><div class="act"><button class="btn" data-a="revisi">✏️ Kirim revisi</button><button class="btn red" data-a="tolak">Tolak</button></div>';
   if(k==='gagal') return '<div class="act"><button class="btn" data-a="ulang">🔁 Produksi ulang</button></div>';
   return '';
 }
@@ -410,7 +411,7 @@ function actionsSB(j){
   if((j.tahap||{}).storyboard!=='tunggu') return '';
   return '<h3>Cek storyboard dulu</h3><div class="hint">Animasi baru dirender setelah kamu setuju. Baca storyboard di bawah (atau unduh versi Word).</div>'+
     '<div class="act"><button class="btn grn" data-a="sb_ok">✅ Storyboard oke — animasikan</button></div>'+
-    '<div class="act"><div><label>Revisi storyboard</label><textarea id="aSB" style="min-height:90px" placeholder="contoh: shot 5 Bu Kos jangan marah, buat senyum terus; potong adegan ojol; tambah jeda setelah saldo habis"></textarea><label style="margin-top:8px">Atau unggah dokumenmu (Word, PDF, teks, foto)</label><input type="file" id="fSB" accept=".docx,.pdf,.md,.txt,.png,.jpg,.jpeg,.webp"><div class="hint">Mis. storyboard versi editanmu — Claude memakainya sebagai acuan utama. Maks 20 MB.</div></div></div>'+
+    '<div class="act"><div><label>Revisi storyboard</label><textarea id="aSB" style="min-height:90px" placeholder="contoh: shot 5 Bu Kos jangan marah, buat senyum terus; potong adegan ojol; tambah jeda setelah saldo habis"></textarea><label style="margin-top:8px">Atau unggah dokumenmu (Word, PDF, teks, foto)</label><input type="file" id="fSB" accept=".docx,.pdf,.md,.txt,.png,.jpg,.jpeg,.webp"><div class="hint">Mis. storyboard versi editanmu — Claude memakainya sebagai acuan utama. Maks 20 MB.</div><label style="margin-top:8px">Gambar latar baru (opsional)</label><input type="file" id="lSB" multiple accept=".png,.jpg,.jpeg,.webp"><div class="hint">Latar dari AI lain. Beri nama berkas sesuai tempatnya (mis. <b>kantor.png</b>, <b>kondangan.jpg</b>) — nama itu jadi nama lokasi.</div></div></div>'+
     '<div class="act"><button class="btn" data-a="sb_rev">✏️ Kirim revisi storyboard</button></div>';
 }
 // render markdown storyboard (judul, gambar, tebal, daftar) — gambar diambil dari repo privat lewat token
@@ -435,12 +436,12 @@ function bindActions(j){
     try{
       if(a==='setujui'){ const m=$('#aMode').value; await dispatch('setujui.yml',{issue:String(j.issue),aksi:'setujui',tayang:m==='auto'?'auto':m==='draf'?'':($('#aWaktu').value||'auto')}) }
       if(a==='tolak'){if(!confirm('Tolak video ini?')){b.disabled=false;return} await dispatch('setujui.yml',{issue:String(j.issue),aksi:'tolak',tayang:''})}
-      if(a==='revisi'){const c=$('#aRev').value.trim(), f=$('#fRev').files[0]; if(!c&&!f){toast('Tulis catatan atau unggah dokumen revisinya.');b.disabled=false;return}
-        const bk=f?await unggah(j,f):''; await dispatch('produksi.yml',{issue:String(j.issue),catatan:c,berkas:bk,tahap:'naskah'})}
+      if(a==='revisi'){let c=$('#aRev').value.trim(); const f=$('#fRev').files[0], L=[...$('#lRev').files]; if(!c&&!f&&!L.length){toast('Tulis catatan atau unggah dokumen revisinya.');b.disabled=false;return}
+        const bk=f?await unggah(j,f):''; c+=await catatanLatar(L); await dispatch('produksi.yml',{issue:String(j.issue),catatan:c.trim(),berkas:bk,tahap:'naskah'})}
       if(a==='ulang') await dispatch('produksi.yml',{issue:String(j.issue),catatan:''});
       if(a==='sb_ok') await dispatch('produksi.yml',{issue:String(j.issue),catatan:'',tahap:'animasi'});
-      if(a==='sb_rev'){const c=$('#aSB').value.trim(), f=$('#fSB').files[0]; if(!c&&!f){toast('Tulis catatan atau unggah dokumen revisinya.');b.disabled=false;return}
-        const bk=f?await unggah(j,f):''; await dispatch('produksi.yml',{issue:String(j.issue),catatan:c,berkas:bk,tahap:'naskah'})}
+      if(a==='sb_rev'){let c=$('#aSB').value.trim(); const f=$('#fSB').files[0], L=[...$('#lSB').files]; if(!c&&!f&&!L.length){toast('Tulis catatan atau unggah dokumen revisinya.');b.disabled=false;return}
+        const bk=f?await unggah(j,f):''; c+=await catatanLatar(L); await dispatch('produksi.yml',{issue:String(j.issue),catatan:c.trim(),berkas:bk,tahap:'naskah'})}
       if(a==='sb_md'){ const x=document.createElement('a');x.href=URL.createObjectURL(new Blob([window._sbmd||''],{type:'text/markdown'}));x.download=j.id+'-storyboard.md';x.click(); b.disabled=false; return }
       if(a==='sb_doc'){ const u=await media(j,'storyboard_docx'); if(u){const x=document.createElement('a');x.href=u;x.download=j.id+'-storyboard.docx';x.click()} b.disabled=false; return }
       toast({setujui:'Disetujui. Upload berjalan; jam tayang muncul di tab Jadwal dalam 1–3 menit.',tolak:'Ditolak.',revisi:'Revisi dikirim. Claude mengerjakan ulang (±10 menit).',ulang:'Produksi diulang.',sb_ok:'Storyboard disetujui. Animasi mulai (±15 menit).',sb_rev:'Revisi dikirim. Claude memperbaiki naskah & storyboard (±10–30 menit).'}[a],5000);
@@ -457,6 +458,22 @@ async function unggah(j,file){
   try{ await gh('/contents/'+path,{method:'PUT',body:JSON.stringify({message:'revisi '+j.id+': '+file.name,content:b64,branch:cfg.branch||'main'})}) }
   catch(e){ if(/403|Resource not accessible/i.test(e.message)) throw new Error('token GitHub perlu izin Contents: Read and write untuk mengunggah'); throw e }
   return path }
+// gambar latar dari pemilik -> assets/latar/<nama>.<ext> (langsung jadi lokasi bernama <nama>)
+async function unggahLatar(file){
+  if(file.size>15e6) throw new Error(file.name+' lebih dari 15 MB');
+  const m=file.name.toLowerCase().match(/^(.*?)(\.(png|jpe?g|webp))$/); if(!m) throw new Error(file.name+' bukan gambar PNG/JPG/WEBP');
+  const nama=(m[1].replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'')||'latar').slice(0,30), path='assets/latar/'+nama+m[2].replace('jpeg','jpg');
+  const b64=await new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(String(r.result).split(',')[1]);r.onerror=no;r.readAsDataURL(file)});
+  let sha; try{ sha=(await (await gh('/contents/'+path+'?ref='+(cfg.branch||'main'))).json()).sha }catch(e){}
+  toast('Mengunggah latar '+nama+'…',8000);
+  try{ await gh('/contents/'+path,{method:'PUT',body:JSON.stringify({message:'latar: '+nama,content:b64,branch:cfg.branch||'main',...(sha?{sha}:{})})}) }
+  catch(e){ if(/403|Resource not accessible/i.test(e.message)) throw new Error('token GitHub perlu izin Contents: Read and write untuk mengunggah'); throw e }
+  return {nama,path} }
+async function catatanLatar(files){
+  if(!files.length) return '';
+  const L=[]; for(const f of files) L.push(await unggahLatar(f));
+  return '\n\n## Latar dari pemilik (sudah terpasang sebagai lokasi)\n'+L.map(x=>'- `'+x.nama+'` ('+x.path+')').join('\n')+
+    '\nPakai lokasi ini di SCENES untuk tempat yang sesuai namanya; jalankan `python3 tools/latar.py --cek '+L.map(x=>x.nama).join(' ')+'` lalu lihat pratinjaunya.' }
 async function dispatch(wf,inputs){await gh('/actions/workflows/'+wf+'/dispatches',{method:'POST',body:JSON.stringify({ref:cfg.branch||'main',inputs})})}
 
 // ---------- naskah baru
@@ -465,13 +482,14 @@ async function kirimNaskah(){
   const nas=$('#nNaskah').value.trim(); const hd=nas.match(/^#{1,2}\s+(.+)$/m); const judul=$('#nJudul').value.trim()||(hd?hd[1]:nas.split(/[.,\n]/)[0]).replace(/[*_#]/g,'').trim().slice(0,70);
   if(!nas) return toast('Tulis dulu idenya.');
   const seri=$('#nSeri').value;
-  const body='Format: '+$('#nFormat').value+(seri?'\nSeri: '+seri:'')+'\n\n## Ide / naskah\n'+nas+($('#nCatatan').value.trim()?'\n\n## Catatan gaya\n'+$('#nCatatan').value.trim():'');
+  let body='Format: '+$('#nFormat').value+(seri?'\nSeri: '+seri:'')+'\n\n## Ide / naskah\n'+nas+($('#nCatatan').value.trim()?'\n\n## Catatan gaya\n'+$('#nCatatan').value.trim():'');
   const b=$('#nKirim'); b.disabled=true;
   try{
+    body+=await catatanLatar([...$('#nLatar').files]);
     try{await gh('/labels',{method:'POST',body:JSON.stringify({name:'naskah',color:'ffd43b'})})}catch(e){}
     const r=await (await gh('/issues',{method:'POST',body:JSON.stringify({title:judul,body,labels:['naskah']})})).json();
     toast('Naskah #'+r.number+' masuk antrean. Claude mulai mengerjakan (±10–15 menit).',6000);
-    ['#nJudul','#nNaskah','#nCatatan'].forEach(s=>$(s).value=''); $('#nSeri').value=''; close('#ovNew'); setTimeout(refresh,8000);
+    ['#nJudul','#nNaskah','#nCatatan','#nLatar'].forEach(s=>$(s).value=''); $('#nSeri').value=''; close('#ovNew'); setTimeout(refresh,8000);
   }catch(e){toast('Gagal: '+e.message,6000)} b.disabled=false;
 }
 
