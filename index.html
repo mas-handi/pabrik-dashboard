@@ -42,10 +42,10 @@ main{max-width:1240px;margin:0 auto;padding:18px 16px 60px}
 .cald.lain{opacity:.35}.cald.kini{border-color:var(--acc)}.cald.pilih{border-color:var(--wait);background:#0f1d33}
 .cald .n{font-size:12px;font-weight:700;color:var(--mut)}.cald.kini .n{color:var(--acc)}
 .ev{font-size:10.5px;line-height:1.25;border-radius:6px;padding:2px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
-.ev.s{background:#3a2f0b;color:var(--acc)}.ev.l{background:#0f1d33;color:var(--wait)}.ev.ok{background:#0f2a1a;color:var(--ok)}
+.ev.s{background:#4a3c0c;color:#ffe27a;border-left:3px solid var(--acc)}.ev.l{background:#16305a;color:#9cc6ff;border-left:3px solid var(--wait)}.ev.ok{background:#14402a;color:#7fe6a6;border-left:3px solid var(--ok)}
 .calk{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--mut);margin-top:10px}.calk span{display:flex;gap:5px;align-items:center}.calk i{width:10px;height:10px;border-radius:3px;display:inline-block}
 .calsub{grid-column:1/-1;font-weight:700;margin:6px 2px 0;color:var(--mut);font-size:13px}
-@media(max-width:700px){.cald{min-height:52px;padding:3px}.ev{font-size:0;padding:0;height:6px;border-radius:3px}.cal{padding:10px 8px}}
+@media(max-width:700px){.cald{min-height:52px;padding:3px}.ev{font-size:0;padding:0;height:7px;border-radius:4px}.ev.s{background:var(--acc)}.ev.l{background:var(--wait)}.ev.ok{background:var(--ok)}.cal{padding:10px 8px}}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;gap:14px;cursor:pointer;transition:.15s}
 .card:hover{border-color:#4a505c;transform:translateY(-1px)}
 .poster{width:92px;height:164px;border-radius:8px;background:#0a0b0e center/cover no-repeat;flex:none;display:grid;place-items:center;color:#555;font-size:22px;image-rendering:pixelated}
@@ -378,7 +378,7 @@ function render(){
 }
 
 // ---------- kalender jadwal tayang
-let calM=null, calSel=null;
+let calM=null, calSel=null, calPilihSendiri=false;
 const ymd=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 function kartu(j){return '<div class="card" data-id="'+j.id+'"><div class="poster" id="p-'+j.id+'">▶</div><div class="info"><div class="top">'+badge(j)+(j.views!=null?'<span class="views">'+Number(j.views).toLocaleString('id-ID')+' views</span>':'')+'</div><div class="title">'+esc(j.judul)+'</div><div class="sub">'+esc(j.format==='keduanya'?'Short + 16:9':j.format==='panjang'?'Video 16:9':'Short')+' · '+(j.tayang?'tayang '+fmtT(j.tayang):'dibuat '+fmtT(j.dibuat))+'</div>'+pipe(j)+'</div></div>'}
 function kalender(){
@@ -386,6 +386,7 @@ function kalender(){
   const ada=jobs.filter(j=>j.tayang&&(kat(j)==='terjadwal'||kat(j)==='tayang')), per={};
   ada.forEach(j=>{const k=ymd(new Date(j.tayang));(per[k]=per[k]||[]).push(j)});
   Object.values(per).forEach(a=>a.sort((x,y)=>String(x.tayang).localeCompare(String(y.tayang))));
+  if(!calPilihSendiri && !per[calSel]){ const nx=Object.keys(per).filter(k=>k>=ymd(now)).sort()[0]; if(nx){ calSel=nx; const d=new Date(nx+'T00:00'); calM=new Date(d.getFullYear(),d.getMonth(),1) } }
   const y=calM.getFullYear(), m=calM.getMonth(), awal=(new Date(y,m,1).getDay()+6)%7, mulai=new Date(y,m,1-awal);
   let h='<div class="cal"><div class="calh"><button data-cal="prev" aria-label="bulan sebelumnya">‹</button><b>'+calM.toLocaleString('id-ID',{month:'long',year:'numeric'})+'</b><button data-cal="today">Hari ini</button><button data-cal="next" aria-label="bulan berikutnya">›</button></div><div class="calg">'+
     ['Sen','Sel','Rab','Kam','Jum','Sab','Min'].map(w=>'<div class="calw">'+w+'</div>').join('');
@@ -545,8 +546,8 @@ document.addEventListener('click',e=>{
   const nv=e.target.closest('[data-nav]'); if(nv){ buzz(); const k=nv.dataset.nav;
     if(k==='ide') return $('#bNew').onclick(); if(k==='atur') return $('#bSet').onclick();
     filt=k; render(); scrollTo({top:0,behavior:'smooth'}); return }
-  const cb=e.target.closest('[data-cal]'); if(cb){ const a=cb.dataset.cal, n=new Date(); if(a==='today'){calM=new Date(n.getFullYear(),n.getMonth(),1);calSel=ymd(n)} else calM=new Date(calM.getFullYear(),calM.getMonth()+(a==='next'?1:-1),1); kalender(); return }
-  const cd=e.target.closest('[data-day]'); if(cd){ calSel=cd.dataset.day; buzz(); kalender(); return }
+  const cb=e.target.closest('[data-cal]'); if(cb){ const a=cb.dataset.cal, n=new Date(); if(a==='today'){calM=new Date(n.getFullYear(),n.getMonth(),1);calSel=ymd(n);calPilihSendiri=true} else { calM=new Date(calM.getFullYear(),calM.getMonth()+(a==='next'?1:-1),1); calPilihSendiri=true } kalender(); return }
+  const cd=e.target.closest('[data-day]'); if(cd){ calSel=cd.dataset.day; calPilihSendiri=true; buzz(); kalender(); return }
   const c=e.target.closest('.card'); if(c) detail(c.dataset.id);
   if(e.target.matches('[data-close]')) close('#'+e.target.closest('.ov').id);
   if(e.target.classList.contains('ov')) close('#'+e.target.id);
