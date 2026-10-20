@@ -312,6 +312,7 @@ function render(){
   document.querySelectorAll('[data-nav]').forEach(b=>b.classList.toggle('on',b.dataset.nav===filt));
   const dm=$('#dotM'); dm.hidden=!n.menunggu; dm.textContent=n.menunggu||'';
   const list=jobs.filter(j=>filt==='semua'||kat(j)===filt);
+  if(filt==='terjadwal') list.sort((a,b)=>String(a.tayang||'9').localeCompare(String(b.tayang||'9')));
   $('#grid').innerHTML=list.length?list.map(j=>'<div class="card" data-id="'+j.id+'"><div class="poster" id="p-'+j.id+'">▶</div><div class="info"><div class="top">'+badge(j)+(j.views!=null?'<span class="views">'+Number(j.views).toLocaleString('id-ID')+' views</span>':'')+'</div><div class="title">'+esc(j.judul)+'</div><div class="sub">'+esc(j.format==='keduanya'?'Short + 16:9':j.format==='panjang'?'Video 16:9':'Short')+' · '+(j.tayang?'tayang '+fmtT(j.tayang):'dibuat '+fmtT(j.dibuat))+'</div>'+pipe(j)+'</div></div>').join(''):'<div class="empty">Belum ada video di sini.</div>';
   list.forEach(async j=>{const u=await media(j,'poster');const el=document.getElementById('p-'+j.id);if(u&&el){el.style.backgroundImage='url('+u+')';el.textContent=''}});
 }
@@ -348,7 +349,9 @@ function detailHead(j){const el=$('#dHead');if(!el)return;
 function nextSlot(){const d=new Date(Date.now()+7*3600e3);let t=new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate(),19,0));if(t<=d)t=new Date(t.getTime()+864e5);return t.toISOString().slice(0,16)}
 function actions(j){
   const k=kat(j);
-  if(k==='menunggu') return '<h3>Keputusanmu</h3><div class="act"><div><label>Jadwal tayang (WIB)</label><input type="datetime-local" id="aWaktu" value="'+nextSlot()+'"></div><button class="btn grn" data-a="setujui">✅ Setujui &amp; jadwalkan</button></div>'+
+  if(k==='menunggu') return '<h3>Keputusanmu</h3><div class="act"><div><label>Jadwal tayang</label><select id="aMode" onchange="document.getElementById(\'aWaktuBox\').style.display=this.value===\'manual\'?\'block\':\'none\'"><option value="auto">🎲 Otomatis (disarankan)</option><option value="manual">🕒 Pilih jam sendiri</option><option value="draf">📁 Draf private (atur di YouTube Studio)</option></select>'+
+    '<div class="hint">Otomatis: hari kosong berikutnya, jam acak di jendela ramai (siang, pulang kerja, malam), makin pintar mengikuti views.</div>'+
+    '<div id="aWaktuBox" style="display:none"><label>Jam tayang (WIB)</label><input type="datetime-local" id="aWaktu" value="'+nextSlot()+'"></div></div><button class="btn grn" data-a="setujui">✅ Setujui &amp; jadwalkan</button></div>'+
     '<div class="act"><div><label>Minta revisi</label><textarea id="aRev" style="min-height:70px" placeholder="contoh: jeda heningnya lebih lama, tambahkan bapaknya menghela napas"></textarea></div></div><div class="act"><button class="btn" data-a="revisi">✏️ Kirim revisi</button><button class="btn red" data-a="tolak">Tolak</button></div>';
   if(k==='gagal') return '<div class="act"><button class="btn" data-a="ulang">🔁 Produksi ulang</button></div>';
   return '';
@@ -358,11 +361,11 @@ function bindActions(j){
     if(!live()) return toast('Mode demo: sambungkan repo di ⚙ Pengaturan untuk memakai tombol ini.');
     const a=b.dataset.a; b.disabled=true;
     try{
-      if(a==='setujui') await dispatch('setujui.yml',{issue:String(j.issue),aksi:'setujui',tayang:$('#aWaktu').value||''});
+      if(a==='setujui'){ const m=$('#aMode').value; await dispatch('setujui.yml',{issue:String(j.issue),aksi:'setujui',tayang:m==='auto'?'auto':m==='draf'?'':($('#aWaktu').value||'auto')}) }
       if(a==='tolak'){if(!confirm('Tolak video ini?')){b.disabled=false;return} await dispatch('setujui.yml',{issue:String(j.issue),aksi:'tolak',tayang:''})}
       if(a==='revisi'){const c=$('#aRev').value.trim(); if(!c){toast('Tulis dulu catatan revisinya.');b.disabled=false;return} await dispatch('produksi.yml',{issue:String(j.issue),catatan:c})}
       if(a==='ulang') await dispatch('produksi.yml',{issue:String(j.issue),catatan:''});
-      toast({setujui:'Disetujui. Upload berjalan, status berubah dalam 1–3 menit.',tolak:'Ditolak.',revisi:'Revisi dikirim. Claude mengerjakan ulang (±10 menit).',ulang:'Produksi diulang.'}[a],5000);
+      toast({setujui:'Disetujui. Upload berjalan; jam tayang muncul di tab Jadwal dalam 1–3 menit.',tolak:'Ditolak.',revisi:'Revisi dikirim. Claude mengerjakan ulang (±10 menit).',ulang:'Produksi diulang.'}[a],5000);
       setTimeout(refresh,4000);
     }catch(e){toast('Gagal: '+e.message,6000);b.disabled=false}
   });
