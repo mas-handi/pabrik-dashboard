@@ -413,7 +413,7 @@ async function dispatch(wf,inputs){await gh('/actions/workflows/'+wf+'/dispatche
 // ---------- naskah baru
 async function kirimNaskah(){
   if(!live()) return toast('Mode demo: sambungkan repo di ⚙ Pengaturan dulu.');
-  const nas=$('#nNaskah').value.trim(); const judul=$('#nJudul').value.trim()||nas.split(/[.,\n]/)[0].slice(0,60);
+  const nas=$('#nNaskah').value.trim(); const hd=nas.match(/^#{1,2}\s+(.+)$/m); const judul=$('#nJudul').value.trim()||(hd?hd[1]:nas.split(/[.,\n]/)[0]).replace(/[*_#]/g,'').trim().slice(0,70);
   if(!nas) return toast('Tulis dulu idenya.');
   const seri=$('#nSeri').value;
   const body='Format: '+$('#nFormat').value+(seri?'\nSeri: '+seri:'')+'\n\n## Ide / naskah\n'+nas+($('#nCatatan').value.trim()?'\n\n## Catatan gaya\n'+$('#nCatatan').value.trim():'');
