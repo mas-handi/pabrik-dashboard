@@ -172,7 +172,7 @@ html,body{font:15px/1.45 Nunito,system-ui,sans-serif;font-weight:700;background:
 body{background-image:linear-gradient(#ffffff08 2px,transparent 2px),linear-gradient(90deg,#ffffff08 2px,transparent 2px);background-size:16px 16px}
 header{background:var(--or);backdrop-filter:none;-webkit-backdrop-filter:none;border-bottom:4px solid var(--ink)}
 .logo{font:15px/1.35 var(--px);text-transform:uppercase;color:var(--acc);text-shadow:3px 3px 0 var(--ink);letter-spacing:0}
-.logo small{font:800 12px Nunito;color:#4a1f00;text-shadow:none}
+.logo small{font:800 12px Nunito;color:#4a1f00;text-shadow:none;text-transform:none}
 #maskot{display:flex;align-items:flex-end;gap:6px;margin-left:auto}
 #maskot img{height:56px;image-rendering:pixelated;display:block}
 #maskot span{background:#fff;color:var(--ink);font:800 12px Nunito;padding:4px 8px;border:3px solid var(--ink);box-shadow:3px 3px 0 var(--ink);margin-bottom:22px;white-space:nowrap;position:relative}
@@ -242,7 +242,8 @@ a{color:var(--wait)}
   .card{border-radius:0}.poster{border-radius:0}.node{width:22px;height:22px}
   .nav{background:var(--ink);backdrop-filter:none;-webkit-backdrop-filter:none;border-top:4px solid var(--or);z-index:40}
   main{padding-bottom:calc(130px + env(safe-area-inset-bottom))}
-  .modal,.modal.sm{padding-bottom:calc(130px + env(safe-area-inset-bottom))}
+  .modal,.modal.sm{padding-bottom:calc(130px + env(safe-area-inset-bottom));height:auto;align-self:flex-start;min-height:100%;background:var(--card)}
+  .ov{display:none;background:var(--card)}.ov.on{display:block}
   .nav button{font:7px/1.4 var(--px);color:#8f80b5;gap:6px}
   .nav button.on{color:var(--acc)}
   .nav .plus .i{border-radius:0;background:var(--acc);color:var(--ink);font:20px var(--px);border:4px solid var(--ink);box-shadow:4px 4px 0 #000,inset -4px -4px 0 #00000030;width:52px;height:52px;margin-top:-28px}
@@ -633,7 +634,7 @@ async function kirimNaskah(){
 
 // ---------- events (navigasi ala aplikasi: tombol kembali HP menutup halaman)
 let ovZ=20;
-function openOv(s){ if(!$(s).classList.contains('on')){ $(s).classList.add('on'); $(s).dataset.z=++ovZ; $(s).style.zIndex=ovZ; try{history.pushState({ov:s},'')}catch(e){} } document.body.style.overflow='hidden'; $(s).scrollTop=0 }
+function openOv(s){ const nk={'#ovNew':'ide','#ovSet':'atur','#ovYT':'atur'}[s]; if(nk) document.querySelectorAll('[data-nav]').forEach(b=>b.classList.toggle('on',b.dataset.nav===nk)); if(!$(s).classList.contains('on')){ $(s).classList.add('on'); $(s).dataset.z=++ovZ; $(s).style.zIndex=ovZ; try{history.pushState({ov:s},'')}catch(e){} } document.body.style.overflow='hidden'; $(s).scrollTop=0 }
 function close(s,fromPop){ if(!$(s).classList.contains('on')) return; $(s).classList.remove('on'); if(!document.querySelector('.ov.on')) document.querySelectorAll('[data-nav]').forEach(b=>b.classList.toggle('on',b.dataset.nav===filt)); if(s==='#ovDet'){openId=null;$('#det').innerHTML=''}
   if(!document.querySelector('.ov.on')) document.body.style.overflow='';
   if(!fromPop && history.state && history.state.ov===s) history.back() }
