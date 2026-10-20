@@ -245,7 +245,7 @@ Salah sapa orang di kondangan, dikira teman SMA ternyata mempelai pria."></texta
 </nav>
 
 <script>
-const TAHAP=[['naskah','Naskah'],['kembangkan','Kembangkan'],['animasi','Animasi'],['qc','QC'],['paket','Paket'],['bos','Bos'],['youtube','YouTube']];
+const TAHAP=[['naskah','Naskah'],['kembangkan','Kembangkan'],['storyboard','Storyboard'],['animasi','Animasi'],['qc','QC'],['paket','Paket'],['bos','Bos'],['youtube','YouTube']];
 const FILTER=[['semua','Semua'],['menunggu','Perlu persetujuan'],['produksi','Produksi'],['terjadwal','Terjadwal'],['tayang','Tayang'],['gagal','Gagal']];
 let cfg=load(), jobs=[], filt='semua', blobs={}, openId=null;
 function load(){try{return JSON.parse(localStorage.getItem('pabrikCfg'))||null}catch(e){return null}}
@@ -289,7 +289,7 @@ function kat(j){const s=(j.status||'').toLowerCase();
   if(s.startsWith('menunggu'))return'menunggu'; if(s.startsWith('gagal')||s.startsWith('ditolak'))return'gagal'; return'produksi'}
 function badge(j){const k=kat(j);const c={tayang:'b-tayang',terjadwal:j.status.startsWith('Draf')?'b-draf':'b-terjadwal',menunggu:'b-menunggu',gagal:'b-gagal',produksi:'b-produksi'}[k];return'<span class="badge '+c+'">'+esc(j.status)+'</span>'}
 // ---------- pipa produksi + estimasi
-const ICON={naskah:'📝',kembangkan:'✨',animasi:'🎬',qc:'🔍',paket:'📦',bos:'👤',youtube:'📺'};
+const ICON={naskah:'📝',kembangkan:'✨',storyboard:'🗂',animasi:'🎬',qc:'🔍',paket:'📦',bos:'👤',youtube:'📺'};
 const PROD=['kembangkan','animasi','qc','paket'];
 const EST0={kembangkan:480,animasi:150,qc:45,paket:75,youtube:60};
 let EST={...EST0}, RUNS={};
@@ -307,9 +307,11 @@ function progInfo(j){
   const T=j.tahap||{}, cur=curStage(j);
   if(T.bos==='tunggu' && !cur) return {pct:100, label:'Menunggu persetujuanmu', eta:null, mode:'wait'};
   if(cur==='youtube'){ const e=est('youtube',j), el=(Date.now()-stageStart(j,'youtube'))/1000; return {pct:Math.min(99,Math.round(el/e*100)), label:'Mengupload ke YouTube', eta:Math.max(0,e-el), mode:'run', cur} }
+  if(T.storyboard==='tunggu' && !cur) return {pct:100, label:'Storyboard siap — cek dulu sebelum animasi', eta:null, mode:'wait'};
   if(!cur || !PROD.includes(cur)) return null;
-  const tot=PROD.reduce((a,k)=>a+est(k,j),0); let done=0;
-  for(const k of PROD){ if(k===cur) break; done+=est(k,j) }
+  const PR = cur==='kembangkan' ? ['kembangkan'] : ['animasi','qc','paket'];   // pabrik berhenti di storyboard menunggu cekmu
+  const tot=PR.reduce((a,k)=>a+est(k,j),0); let done=0;
+  for(const k of PR){ if(k===cur) break; done+=est(k,j) }
   const e=est(cur,j), el=Math.max(0,(Date.now()-stageStart(j,cur))/1000), part=Math.min(e*0.95, el);
   const rem=Math.max(0, tot-done-part) + (el>e*0.95?20:0);
   return {pct:Math.min(99,Math.round((done+part)/tot*100)), label:TAHAP.find(x=>x[0]===cur)[1]+(el>e*0.95?' (hampir selesai)':''), eta:rem, mode:'run', cur};
@@ -367,20 +369,24 @@ async function detail(id){
     const pu=await media(j,'poster');
     $('#dPlayer').innerHTML=!u?'<div class="sub">Media belum tersedia.</div>':(k==='cover'?'<img src="'+u+'">':'<video src="'+u+'" controls playsinline'+(pu&&k==='short'?' poster="'+pu+'"':'')+(k==='short'?' style="aspect-ratio:9/16"':'')+'></video>')+'<div class="act"><a class="btn" download="'+j.id+'-'+k+(k==='cover'?'.png':'.mp4')+'" href="'+u+'">⬇ Unduh '+({short:'Short',video:'video 16:9',cover:'cover'}[k])+'</a></div>'};
   $('#dTabs').onclick=e=>{const t=e.target.dataset.tab;if(t)show(t)};
-  if(tabs.length) show(tabs[0][0]); else $('#dPlayer').innerHTML='<div class="poster" style="width:100%;height:300px">⏳</div>';
+  if(tabs.length) show(tabs[0][0]);
+  else { $('#dPlayer').innerHTML='<div class="poster" style="width:100%;height:120px">⏳</div>'; media(j,'poster').then(u=>{ if(u&&openId===id) $('#dPlayer').innerHTML='<img src="'+u+'" style="width:100%;border-radius:10px"><div class="hint">Gambar dari storyboard — video dibuat setelah storyboard disetujui.</div>' }) }
   const get=async p=>{try{return await raw(p,p.endsWith('.json')?'json':'text')}catch(e){return null}};
-  const [meta,qc,ring,kasar]=await Promise.all([get('jobs/'+id+'/meta.json'),get('jobs/'+id+'/qc.json'),get('jobs/'+id+'/ringkasan.md'),get('jobs/'+id+'/naskah_kasar.md')]);
+  const [meta,qc,ring,kasar,sbmd]=await Promise.all([get('jobs/'+id+'/meta.json'),get('jobs/'+id+'/qc.json'),get('jobs/'+id+'/ringkasan.md'),get('jobs/'+id+'/naskah_kasar.md'),j.media&&j.media.storyboard?get(j.media.storyboard):null]);
   if(openId!==id) return;
   let h='';
   if(j.catatan) h+='<div class="banner">'+esc(j.catatan)+'</div>';
   h+=actions(j);
   if(meta){const s=meta.short||{};h+='<h3>Judul &amp; caption</h3><div class="kv"><b>'+esc(s.judul||meta.judul)+'</b>\n\n'+esc(s.deskripsi||meta.deskripsi||'')+'</div>';
     if(meta.tags) h+='<div class="hint">Tag: '+esc(meta.tags.join(', '))+'</div>'}
+  h=actionsSB(j)+h;
+  let sbr=null; if(sbmd){ sbr=await renderMD(sbmd); h+='<details '+((j.tahap||{}).storyboard==='tunggu'?'open':'')+' style="margin-top:14px"><summary style="cursor:pointer;font-weight:700">🗂 Storyboard</summary><div class="kv" style="white-space:normal">'+sbr.html+'</div></details>' }
   if(ring) h+='<h3>Yang dikembangkan Claude</h3><div class="kv">'+esc(ring)+'</div>';
   if(qc) h+='<h3>QC '+(qc.lulus?'✅ lulus':'❌ ada masalah')+'</h3><ul class="qc">'+qc.gagal.map(x=>'<li class="no">✗ '+esc(x)+'</li>').join('')+qc.ok.map(x=>'<li class="yes">✓ '+esc(x)+'</li>').join('')+'</ul>';
   if(kasar) h+='<h3>Naskah kasar darimu</h3><div class="kv">'+esc(kasar)+'</div>';
   h+='<h3>Riwayat</h3><div class="kv runs">'+(j.log||[]).slice(-8).reverse().map(l=>fmtT(l[0])+'  '+esc(l[1])).join('\n')+'</div>';
   $('#dBody').innerHTML=h; bindActions(j);
+  if(sbr) for(const [iid,src] of sbr.imgs){ const k=src+'@'+j.diperbarui; if(!(k in blobs)){ try{blobs[k]=await raw(src,'blob')}catch(e){blobs[k]=null} } const el=document.getElementById(iid); if(el&&blobs[k]) el.src=blobs[k] }
 }
 function detailHead(j){const el=$('#dHead');if(!el)return;
   const yt=j.youtube||{};const links=[yt.short_id&&!yt.short_id.startsWith('demo')?'<a target="_blank" href="https://youtube.com/shorts/'+yt.short_id+'">Short di YouTube</a>':'',yt.long_id?'<a target="_blank" href="https://youtu.be/'+yt.long_id+'">Video di YouTube</a>':'',live()&&j.issue?'<a target="_blank" href="https://github.com/'+cfg.owner+'/'+cfg.repo+'/issues/'+j.issue+'">Issue #'+j.issue+'</a>':''].filter(Boolean).join(' · ');
@@ -395,6 +401,28 @@ function actions(j){
   if(k==='gagal') return '<div class="act"><button class="btn" data-a="ulang">🔁 Produksi ulang</button></div>';
   return '';
 }
+function actionsSB(j){
+  if((j.tahap||{}).storyboard!=='tunggu') return '';
+  return '<h3>Cek storyboard dulu</h3><div class="hint">Animasi baru dirender setelah kamu setuju. Baca storyboard di bawah (atau unduh versi Word).</div>'+
+    '<div class="act"><button class="btn grn" data-a="sb_ok">✅ Storyboard oke — animasikan</button>'+(j.media&&j.media.storyboard_docx?'<button class="btn" data-a="sb_doc">⬇ Unduh storyboard (Word)</button>':'')+'</div>'+
+    '<div class="act"><div><label>Revisi storyboard</label><textarea id="aSB" style="min-height:90px" placeholder="contoh: shot 5 Bu Kos jangan marah, buat senyum terus; potong adegan ojol; tambah jeda setelah saldo habis"></textarea></div></div>'+
+    '<div class="act"><button class="btn" data-a="sb_rev">✏️ Kirim revisi storyboard</button></div>';
+}
+// render markdown storyboard (judul, gambar, tebal, daftar) — gambar diambil dari repo privat lewat token
+async function renderMD(md){
+  const out=[], imgs=[];
+  for(const line of md.split('\n')){
+    let h=esc(line).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>');
+    const im=/^!\[(.*?)\]\((.+?)\)$/.exec(line);
+    if(im){ const id='sbimg'+imgs.length; imgs.push([id,im[2]]); out.push('<img id="'+id+'" alt="'+esc(im[1])+'" style="width:100%;max-width:640px;border-radius:8px;background:#000;min-height:60px;display:block;margin:6px 0">'); continue }
+    if(line.startsWith('### ')) out.push('<h4 style="margin:18px 0 4px;font-size:15px">'+h.slice(4)+'</h4>');
+    else if(line.startsWith('## ')) out.push('<h3>'+h.slice(3)+'</h3>');
+    else if(line.startsWith('# ')) out.push('<h3 style="color:var(--txt);text-transform:none;letter-spacing:0;font-size:17px">'+h.slice(2)+'</h3>');
+    else if(line.startsWith('- ')) out.push('<div style="padding-left:14px">• '+h.slice(2)+'</div>');
+    else if(line.trim()) out.push('<div>'+h+'</div>');
+  }
+  return {html:out.join(''), imgs};
+}
 function bindActions(j){
   $('#dBody').querySelectorAll('[data-a]').forEach(b=>b.onclick=async()=>{
     if(!live()) return toast('Mode demo: sambungkan repo di ⚙ Pengaturan untuk memakai tombol ini.');
@@ -404,7 +432,10 @@ function bindActions(j){
       if(a==='tolak'){if(!confirm('Tolak video ini?')){b.disabled=false;return} await dispatch('setujui.yml',{issue:String(j.issue),aksi:'tolak',tayang:''})}
       if(a==='revisi'){const c=$('#aRev').value.trim(); if(!c){toast('Tulis dulu catatan revisinya.');b.disabled=false;return} await dispatch('produksi.yml',{issue:String(j.issue),catatan:c})}
       if(a==='ulang') await dispatch('produksi.yml',{issue:String(j.issue),catatan:''});
-      toast({setujui:'Disetujui. Upload berjalan; jam tayang muncul di tab Jadwal dalam 1–3 menit.',tolak:'Ditolak.',revisi:'Revisi dikirim. Claude mengerjakan ulang (±10 menit).',ulang:'Produksi diulang.'}[a],5000);
+      if(a==='sb_ok') await dispatch('produksi.yml',{issue:String(j.issue),catatan:'',tahap:'animasi'});
+      if(a==='sb_rev'){const c=$('#aSB').value.trim(); if(!c){toast('Tulis dulu catatan revisinya.');b.disabled=false;return} await dispatch('produksi.yml',{issue:String(j.issue),catatan:c,tahap:'naskah'})}
+      if(a==='sb_doc'){ const u=await media(j,'storyboard_docx'); if(u){const x=document.createElement('a');x.href=u;x.download=j.id+'-storyboard.docx';x.click()} b.disabled=false; return }
+      toast({setujui:'Disetujui. Upload berjalan; jam tayang muncul di tab Jadwal dalam 1–3 menit.',tolak:'Ditolak.',revisi:'Revisi dikirim. Claude mengerjakan ulang (±10 menit).',ulang:'Produksi diulang.',sb_ok:'Storyboard disetujui. Animasi mulai (±15 menit).',sb_rev:'Revisi dikirim. Claude memperbaiki naskah & storyboard (±10–30 menit).'}[a],5000);
       setTimeout(refresh,4000);
     }catch(e){toast('Gagal: '+e.message,6000);b.disabled=false}
   });
