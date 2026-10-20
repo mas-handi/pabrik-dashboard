@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<meta name="theme-color" content="#0d0f13">
+<meta name="theme-color" content="#ff9a3c">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -14,7 +14,7 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <title>Pabrik Pixel</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#0d0f13;--card:#16181e;--card2:#1c1f26;--line:#2a2e37;--txt:#e9ecf2;--mut:#8b93a3;--ok:#3ecf74;--run:#f3b13b;--bad:#ef5b5b;--wait:#5aa2ff;--off:#3a3f4a;--acc:#ffd43b}
 *{box-sizing:border-box}html,body{overscroll-behavior-y:contain;-webkit-tap-highlight-color:transparent}html,body{margin:0;background:var(--bg);color:var(--txt);font:14px/1.45 Inter,system-ui,sans-serif}
@@ -161,12 +161,105 @@ code.u{display:block;background:#0f1116;border:1px solid var(--line);border-radi
   .toast{bottom:calc(86px + env(safe-area-inset-bottom));width:max-content;max-width:calc(100vw - 32px)}
 }
 @media(display-mode:standalone){.bar{padding-top:6px}}
+
+@font-face{font-family:'Press Start 2P';src:url(fonts/press-start-2p.woff2) format('woff2');font-display:swap}
+@font-face{font-family:Nunito;src:url(fonts/nunito-700.woff2) format('woff2');font-weight:600 700;font-display:swap}
+@font-face{font-family:Nunito;src:url(fonts/nunito-800.woff2) format('woff2');font-weight:800;font-display:swap}
+@font-face{font-family:Nunito;src:url(fonts/nunito-900.woff2) format('woff2');font-weight:900;font-display:swap}
+/* ================= TEMA RETRO PIXEL (pabrik ala game) ================= */
+:root{--bg:#2b2140;--card:#4a3a6e;--card2:#3a2d58;--line:#120c1f;--txt:#fff;--mut:#c9b8ff;--ok:#3ecf74;--run:#ffe14d;--bad:#ff5d5d;--wait:#5ad1ff;--off:#6b5a8f;--acc:#ffe14d;--or:#ff9a3c;--ink:#120c1f;--px:'Press Start 2P',monospace}
+html,body{font:15px/1.45 Nunito,system-ui,sans-serif;font-weight:700;background:var(--bg)}
+body{background-image:linear-gradient(#ffffff08 2px,transparent 2px),linear-gradient(90deg,#ffffff08 2px,transparent 2px);background-size:16px 16px}
+header{background:var(--or);backdrop-filter:none;-webkit-backdrop-filter:none;border-bottom:4px solid var(--ink)}
+.logo{font:15px/1.35 var(--px);text-transform:uppercase;color:var(--acc);text-shadow:3px 3px 0 var(--ink);letter-spacing:0}
+.logo small{font:800 12px Nunito;color:#4a1f00;text-shadow:none}
+#maskot{display:flex;align-items:flex-end;gap:6px;margin-left:auto}
+#maskot img{height:56px;image-rendering:pixelated;display:block}
+#maskot span{background:#fff;color:var(--ink);font:800 12px Nunito;padding:4px 8px;border:3px solid var(--ink);box-shadow:3px 3px 0 var(--ink);margin-bottom:22px;white-space:nowrap;position:relative}
+#maskot span::after{content:"";position:absolute;right:-9px;bottom:6px;border:6px solid transparent;border-left-color:var(--ink)}
+.logo{margin-right:0}
+.btn{border:3px solid var(--ink);border-radius:0;background:var(--card2);box-shadow:3px 3px 0 var(--ink),inset -3px -3px 0 #00000035,inset 3px 3px 0 #ffffff25;font:800 14px Nunito;color:var(--txt);transition:none}
+.btn:hover{border-color:var(--ink);filter:brightness(1.08)}
+.btn:active{transform:translate(3px,3px);box-shadow:inset -3px -3px 0 #00000035,inset 3px 3px 0 #ffffff25}
+.btn.pri{background:var(--acc);color:var(--ink);border-color:var(--ink)}.btn.grn{background:var(--ok);color:var(--ink);border-color:var(--ink)}.btn.red{background:#5a2440;color:#ffb3b3}
+.chip{border:3px solid var(--ink);border-radius:0;background:var(--card2);color:var(--mut);font:800 13px Nunito;box-shadow:2px 2px 0 var(--ink)}
+.chip.on{background:var(--acc);color:var(--ink);border-color:var(--ink)}.chip b{color:var(--or)}.chip.on b{color:#7a2f00}
+.card{background:var(--card);border:4px solid var(--ink);border-radius:0;box-shadow:4px 4px 0 var(--ink),inset -4px -4px 0 #00000040,inset 4px 4px 0 #ffffff22;transition:none}
+.card:hover{transform:translate(-1px,-1px);border-color:var(--ink);box-shadow:5px 5px 0 var(--ink),inset -4px -4px 0 #00000040,inset 4px 4px 0 #ffffff22}
+.card:active{transform:translate(3px,3px)!important;box-shadow:inset -4px -4px 0 #00000040!important}
+.poster{border:3px solid var(--ink);border-radius:0;background-color:#1c1530;color:var(--mut)}
+.title{font-weight:900}.sub{color:var(--mut);font-weight:700}
+.badge{border-radius:0;border:2px solid var(--ink);font:8px/1.6 var(--px);padding:3px 6px;text-transform:uppercase}
+.b-tayang{background:var(--ok);color:var(--ink);border-color:var(--ink)}.b-terjadwal{background:var(--wait);color:var(--ink);border-color:var(--ink)}
+.b-menunggu{background:var(--acc);color:var(--ink);border-color:var(--ink)}.b-produksi{background:#8f80b5;color:var(--ink);border-color:var(--ink)}
+.b-gagal{background:var(--bad);color:var(--ink);border-color:var(--ink)}.b-draf{background:#c39bff;color:var(--ink);border-color:var(--ink)}
+.views{border-radius:0;background:var(--ink);color:#fff;font-weight:800}
+/* ban berjalan produksi */
+.node{border-radius:0;border:3px solid var(--ink);background:#3a2d58;filter:grayscale(1);opacity:.6}
+.node.ok{background:var(--ok);border-color:var(--ink)}.node.jalan{background:var(--acc);border-color:var(--ink);animation:loncat .6s steps(2) infinite}
+.node.gagal{background:var(--bad);border-color:var(--ink)}.node.tunggu{background:var(--wait);border-color:var(--ink);animation:loncat 1.2s steps(2) infinite}
+@keyframes loncat{50%{transform:translateY(-3px)}}
+.seg{height:8px;margin:0 -1px;border:0;border-top:3px solid var(--ink);border-bottom:3px solid var(--ink);background:repeating-linear-gradient(90deg,#6b5a8f 0 5px,#1c1530 5px 10px)}
+.seg .fill{background:var(--ok)}
+.seg.flow .fill{background:repeating-linear-gradient(90deg,var(--wait) 0 6px,#1c1530 6px 12px);background-size:24px 100%;animation:flow .5s steps(4) infinite}
+@keyframes flow{to{background-position:24px 0}}
+.seg.flow::after{display:none}
+.prog b{font:12px var(--px);color:var(--acc)}
+.bar2{height:8px;border-radius:0;border:2px solid var(--ink);background:#1c1530}.bar2 i{background:repeating-linear-gradient(90deg,var(--ok) 0 6px,#2fae5f 6px 8px)}
+.banner{background:var(--acc);color:var(--ink);border:3px solid var(--ink);border-radius:0;box-shadow:3px 3px 0 var(--ink);font-weight:800}
+.empty{font:10px/1.8 var(--px);color:var(--mut)}
+/* jendela & formulir */
+.ov{background:rgba(18,12,31,.75)}
+.modal{background:var(--card);border:4px solid var(--ink);border-radius:0;box-shadow:6px 6px 0 var(--ink)}
+h2{font:900 20px/1.3 Nunito;color:var(--acc);text-shadow:2px 2px 0 var(--ink)}
+h3{font:10px/1.6 var(--px);color:var(--acc);letter-spacing:0;display:flex;gap:8px;align-items:center}
+h3::after{content:"";flex:1;height:4px;background:repeating-linear-gradient(90deg,var(--acc) 0 8px,transparent 8px 12px)}
+label{font-weight:800}
+input,select,textarea{background:#1c1530;border:3px solid var(--ink);border-radius:0;box-shadow:inset 3px 3px 0 #00000040;font-weight:700}
+input:focus,select:focus,textarea:focus{outline:3px solid var(--acc);outline-offset:0}
+.kv,.inst{background:#2b2140;border:3px solid var(--ink);border-radius:0}
+.player video,.player img{border-radius:0;border:3px solid var(--ink)}
+.toast{background:var(--ink);border:3px solid var(--acc);border-radius:0;font-weight:800}
+code.u{border-radius:0;border:2px solid var(--ink);background:#1c1530}
+a{color:var(--wait)}
+/* kalender */
+.cal{background:var(--card);border:4px solid var(--ink);border-radius:0;box-shadow:4px 4px 0 var(--ink)}
+.calh b{font:12px var(--px);color:var(--acc);text-transform:uppercase;text-align:center}
+.calh button{border:3px solid var(--ink);border-radius:0;background:var(--card2);box-shadow:2px 2px 0 var(--ink);font-weight:800}
+.calw{font-weight:800;color:var(--mut)}
+.cald{background:var(--bg);border:2px solid var(--ink);border-radius:0}
+.cald .n{color:var(--mut);font-weight:900}
+.cald.kini{background:var(--or);border-color:var(--ink)}.cald.kini .n{color:var(--ink)}
+.cald.pilih{outline:3px solid var(--acc);outline-offset:-3px;background:var(--card2)}
+.ev{border-radius:0}.ev.s{background:var(--acc);color:var(--ink);border-left:0}.ev.l{background:var(--wait);color:var(--ink);border-left:0}.ev.ok{background:var(--ok);color:var(--ink);border-left:0}
+.calk i{border-radius:0;border:2px solid var(--ink)}
+.calsub{font:9px/1.6 var(--px);color:var(--acc);margin-top:10px}
+@media(max-width:760px){
+  header{background:var(--or)}
+  .logo{font-size:13px}
+  #maskot img{height:48px}#maskot span{font-size:11px;margin-bottom:18px;max-width:42vw;white-space:normal}
+  #bRef{border-radius:0}
+  .card{border-radius:0}.poster{border-radius:0}.node{width:22px;height:22px}
+  .nav{background:var(--ink);backdrop-filter:none;-webkit-backdrop-filter:none;border-top:4px solid var(--or)}
+  .nav button{font:7px/1.4 var(--px);color:#8f80b5;gap:6px}
+  .nav button.on{color:var(--acc)}
+  .nav .plus .i{border-radius:0;background:var(--acc);color:var(--ink);font:20px var(--px);border:4px solid var(--ink);box-shadow:4px 4px 0 #000,inset -4px -4px 0 #00000030;width:52px;height:52px;margin-top:-28px}
+  .nav .plus:active .i{transform:translate(3px,3px);box-shadow:none}
+  .nav .dot{border-radius:0;border:2px solid var(--ink);font:8px/12px var(--px)}
+  .ptr{border-radius:0;border:3px solid var(--ink);background:var(--acc)}
+  .ov{background:var(--bg)}
+  .modal,.modal.sm{border:0;box-shadow:none}
+  .x{background:var(--ink);backdrop-filter:none;-webkit-backdrop-filter:none;border-bottom:4px solid var(--or)}
+  .x::before{color:var(--acc)}.x::after{font:10px var(--px);color:#fff}
+  .ev{height:7px}
+}
 </style>
 </head>
 <body>
 <header>
   <div class="bar">
     <div class="logo">Pabrik Pixel <small id="sumber">memuat…</small></div>
+    <div id="maskot"><span id="maskotTeks">Halo!</span><img id="maskotImg" src="icons/mas-senang.png" alt=""></div>
     <span class="runs" id="runs"></span>
     <button class="btn" id="bInstall">⬇ Pasang aplikasi</button>
     <button class="btn ico" id="bRef" aria-label="Segarkan">↻</button>
@@ -371,6 +464,9 @@ function render(){
   $('#chips').innerHTML=FILTER.map(([k,l])=>'<button class="chip '+(filt===k?'on':'')+'" data-f="'+k+'">'+l+(n[k]?'<b>'+n[k]+'</b>':'')+'</button>').join('');
   document.querySelectorAll('[data-nav]').forEach(b=>b.classList.toggle('on',b.dataset.nav===filt));
   const dm=$('#dotM'); dm.hidden=!n.menunggu; dm.textContent=n.menunggu||'';
+  const perlu=n.menunggu||0, gg=jobs.filter(j=>/^gagal/i.test(j.status||'')).length;
+  const [mi,mt]=gg?['sedih','Ada '+gg+' yg gagal…']:perlu?['panik','Ada '+perlu+' yg perlu dicek!']:n.produksi?['kerja','Lagi produksi…']:['senang','Semua beres!'];
+  $('#maskotImg').src='icons/mas-'+mi+'.png'; $('#maskotTeks').textContent=mt;
   const list=jobs.filter(j=>filt==='semua'||kat(j)===filt);
   if(filt==='terjadwal'){ kalender(); return }
   $('#grid').innerHTML=list.length?list.map(j=>'<div class="card" data-id="'+j.id+'"><div class="poster" id="p-'+j.id+'">▶</div><div class="info"><div class="top">'+badge(j)+(j.views!=null?'<span class="views">'+Number(j.views).toLocaleString('id-ID')+' views</span>':'')+'</div><div class="title">'+esc(j.judul)+'</div><div class="sub">'+esc(j.format==='keduanya'?'Short + 16:9':j.format==='panjang'?'Video 16:9':'Short')+' · '+(j.tayang?'tayang '+fmtT(j.tayang):'dibuat '+fmtT(j.dibuat))+'</div>'+pipe(j)+'</div></div>').join(''):'<div class="empty">Belum ada video di sini.</div>';
