@@ -198,7 +198,7 @@ Salah sapa orang di kondangan, dikira teman SMA ternyata mempelai pria."></texta
   <label>Nama repo</label><input id="sRepo" placeholder="pabrik-pixel">
   <label>Branch</label><input id="sBranch" value="main">
   <label>Token GitHub (fine-grained)</label><input id="sToken" type="password" placeholder="github_pat_…">
-  <div class="hint">Izin repo ini saja: Contents (read), Issues (read &amp; write), Actions (read &amp; write). Token hanya disimpan di browser ini.</div>
+  <div class="hint">Izin repo ini saja: Contents (read &amp; write — untuk unggah dokumen revisi), Issues (read &amp; write), Actions (read &amp; write), Secrets (read &amp; write — untuk koneksi YouTube). Token hanya disimpan di browser ini.</div>
   <div class="act"><button class="btn pri" id="sSimpan">Simpan</button><button class="btn red" id="sHapus">Hapus &amp; pakai mode demo</button></div>
   <div class="inst"><b>📺 YouTube</b><span class="hint" id="ytMini">Hubungkan kanal agar video bisa diupload & dijadwalkan otomatis.</span>
   <div class="act"><button class="btn pri" id="sYT">Atur koneksi YouTube</button></div></div>
@@ -380,7 +380,9 @@ async function detail(id){
   if(meta){const s=meta.short||{};h+='<h3>Judul &amp; caption</h3><div class="kv"><b>'+esc(s.judul||meta.judul)+'</b>\n\n'+esc(s.deskripsi||meta.deskripsi||'')+'</div>';
     if(meta.tags) h+='<div class="hint">Tag: '+esc(meta.tags.join(', '))+'</div>'}
   h=actionsSB(j)+h;
-  let sbr=null; if(sbmd){ sbr=await renderMD(sbmd); h+='<details '+((j.tahap||{}).storyboard==='tunggu'?'open':'')+' style="margin-top:14px"><summary style="cursor:pointer;font-weight:700">🗂 Storyboard</summary><div class="kv" style="white-space:normal">'+sbr.html+'</div></details>' }
+  let sbr=null; if(sbmd){ sbr=await renderMD(sbmd); h+='<details '+((j.tahap||{}).storyboard==='tunggu'?'open':'')+' style="margin-top:14px"><summary style="cursor:pointer;font-weight:700">🗂 Storyboard</summary>'+
+      '<div class="act">'+(j.media&&j.media.storyboard_docx?'<button class="btn" data-a="sb_doc">⬇ Unduh Word</button>':'')+'<button class="btn" data-a="sb_md">⬇ Unduh teks (.md)</button></div>'+
+      '<div class="kv" style="white-space:normal">'+sbr.html+'</div></details>'; window._sbmd=sbmd }
   if(ring) h+='<h3>Yang dikembangkan Claude</h3><div class="kv">'+esc(ring)+'</div>';
   if(qc) h+='<h3>QC '+(qc.lulus?'✅ lulus':'❌ ada masalah')+'</h3><ul class="qc">'+qc.gagal.map(x=>'<li class="no">✗ '+esc(x)+'</li>').join('')+qc.ok.map(x=>'<li class="yes">✓ '+esc(x)+'</li>').join('')+'</ul>';
   if(kasar) h+='<h3>Naskah kasar darimu</h3><div class="kv">'+esc(kasar)+'</div>';
@@ -397,15 +399,15 @@ function actions(j){
   if(k==='menunggu') return '<h3>Keputusanmu</h3><div class="act"><div><label>Jadwal tayang</label><select id="aMode" onchange="document.getElementById(\'aWaktuBox\').style.display=this.value===\'manual\'?\'block\':\'none\'"><option value="auto">🎲 Otomatis (disarankan)</option><option value="manual">🕒 Pilih jam sendiri</option><option value="draf">📁 Draf private (atur di YouTube Studio)</option></select>'+
     '<div class="hint">Otomatis: hari kosong berikutnya, jam acak di jendela ramai (siang, pulang kerja, malam), makin pintar mengikuti views.</div>'+
     '<div id="aWaktuBox" style="display:none"><label>Jam tayang (WIB)</label><input type="datetime-local" id="aWaktu" value="'+nextSlot()+'"></div></div><button class="btn grn" data-a="setujui">✅ Setujui &amp; jadwalkan</button></div>'+
-    '<div class="act"><div><label>Minta revisi</label><textarea id="aRev" style="min-height:70px" placeholder="contoh: jeda heningnya lebih lama, tambahkan bapaknya menghela napas"></textarea></div></div><div class="act"><button class="btn" data-a="revisi">✏️ Kirim revisi</button><button class="btn red" data-a="tolak">Tolak</button></div>';
+    '<div class="act"><div><label>Minta revisi</label><textarea id="aRev" style="min-height:70px" placeholder="contoh: jeda heningnya lebih lama, tambahkan bapaknya menghela napas"></textarea><label style="margin-top:8px">Atau unggah dokumenmu (Word, PDF, teks, foto)</label><input type="file" id="fRev" accept=".docx,.pdf,.md,.txt,.png,.jpg,.jpeg,.webp"><div class="hint">Mis. storyboard versi editanmu — Claude memakainya sebagai acuan utama. Maks 20 MB.</div></div></div><div class="act"><button class="btn" data-a="revisi">✏️ Kirim revisi</button><button class="btn red" data-a="tolak">Tolak</button></div>';
   if(k==='gagal') return '<div class="act"><button class="btn" data-a="ulang">🔁 Produksi ulang</button></div>';
   return '';
 }
 function actionsSB(j){
   if((j.tahap||{}).storyboard!=='tunggu') return '';
   return '<h3>Cek storyboard dulu</h3><div class="hint">Animasi baru dirender setelah kamu setuju. Baca storyboard di bawah (atau unduh versi Word).</div>'+
-    '<div class="act"><button class="btn grn" data-a="sb_ok">✅ Storyboard oke — animasikan</button>'+(j.media&&j.media.storyboard_docx?'<button class="btn" data-a="sb_doc">⬇ Unduh storyboard (Word)</button>':'')+'</div>'+
-    '<div class="act"><div><label>Revisi storyboard</label><textarea id="aSB" style="min-height:90px" placeholder="contoh: shot 5 Bu Kos jangan marah, buat senyum terus; potong adegan ojol; tambah jeda setelah saldo habis"></textarea></div></div>'+
+    '<div class="act"><button class="btn grn" data-a="sb_ok">✅ Storyboard oke — animasikan</button></div>'+
+    '<div class="act"><div><label>Revisi storyboard</label><textarea id="aSB" style="min-height:90px" placeholder="contoh: shot 5 Bu Kos jangan marah, buat senyum terus; potong adegan ojol; tambah jeda setelah saldo habis"></textarea><label style="margin-top:8px">Atau unggah dokumenmu (Word, PDF, teks, foto)</label><input type="file" id="fSB" accept=".docx,.pdf,.md,.txt,.png,.jpg,.jpeg,.webp"><div class="hint">Mis. storyboard versi editanmu — Claude memakainya sebagai acuan utama. Maks 20 MB.</div></div></div>'+
     '<div class="act"><button class="btn" data-a="sb_rev">✏️ Kirim revisi storyboard</button></div>';
 }
 // render markdown storyboard (judul, gambar, tebal, daftar) — gambar diambil dari repo privat lewat token
@@ -425,21 +427,33 @@ async function renderMD(md){
 }
 function bindActions(j){
   $('#dBody').querySelectorAll('[data-a]').forEach(b=>b.onclick=async()=>{
-    if(!live()) return toast('Mode demo: sambungkan repo di ⚙ Pengaturan untuk memakai tombol ini.');
+    if(!live() && !/^sb_(md|doc)$/.test(b.dataset.a)) return toast('Mode demo: sambungkan repo di ⚙ Pengaturan untuk memakai tombol ini.');
     const a=b.dataset.a; b.disabled=true;
     try{
       if(a==='setujui'){ const m=$('#aMode').value; await dispatch('setujui.yml',{issue:String(j.issue),aksi:'setujui',tayang:m==='auto'?'auto':m==='draf'?'':($('#aWaktu').value||'auto')}) }
       if(a==='tolak'){if(!confirm('Tolak video ini?')){b.disabled=false;return} await dispatch('setujui.yml',{issue:String(j.issue),aksi:'tolak',tayang:''})}
-      if(a==='revisi'){const c=$('#aRev').value.trim(); if(!c){toast('Tulis dulu catatan revisinya.');b.disabled=false;return} await dispatch('produksi.yml',{issue:String(j.issue),catatan:c})}
+      if(a==='revisi'){const c=$('#aRev').value.trim(), f=$('#fRev').files[0]; if(!c&&!f){toast('Tulis catatan atau unggah dokumen revisinya.');b.disabled=false;return}
+        const bk=f?await unggah(j,f):''; await dispatch('produksi.yml',{issue:String(j.issue),catatan:c,berkas:bk,tahap:'naskah'})}
       if(a==='ulang') await dispatch('produksi.yml',{issue:String(j.issue),catatan:''});
       if(a==='sb_ok') await dispatch('produksi.yml',{issue:String(j.issue),catatan:'',tahap:'animasi'});
-      if(a==='sb_rev'){const c=$('#aSB').value.trim(); if(!c){toast('Tulis dulu catatan revisinya.');b.disabled=false;return} await dispatch('produksi.yml',{issue:String(j.issue),catatan:c,tahap:'naskah'})}
+      if(a==='sb_rev'){const c=$('#aSB').value.trim(), f=$('#fSB').files[0]; if(!c&&!f){toast('Tulis catatan atau unggah dokumen revisinya.');b.disabled=false;return}
+        const bk=f?await unggah(j,f):''; await dispatch('produksi.yml',{issue:String(j.issue),catatan:c,berkas:bk,tahap:'naskah'})}
+      if(a==='sb_md'){ const x=document.createElement('a');x.href=URL.createObjectURL(new Blob([window._sbmd||''],{type:'text/markdown'}));x.download=j.id+'-storyboard.md';x.click(); b.disabled=false; return }
       if(a==='sb_doc'){ const u=await media(j,'storyboard_docx'); if(u){const x=document.createElement('a');x.href=u;x.download=j.id+'-storyboard.docx';x.click()} b.disabled=false; return }
       toast({setujui:'Disetujui. Upload berjalan; jam tayang muncul di tab Jadwal dalam 1–3 menit.',tolak:'Ditolak.',revisi:'Revisi dikirim. Claude mengerjakan ulang (±10 menit).',ulang:'Produksi diulang.',sb_ok:'Storyboard disetujui. Animasi mulai (±15 menit).',sb_rev:'Revisi dikirim. Claude memperbaiki naskah & storyboard (±10–30 menit).'}[a],5000);
       setTimeout(refresh,4000);
     }catch(e){toast('Gagal: '+e.message,6000);b.disabled=false}
   });
 }
+// unggah dokumen revisi ke repo privat (jobs/<id>/revisi/...) — token perlu izin Contents: Read and write
+async function unggah(j,file){
+  if(file.size>20e6) throw new Error('berkas lebih dari 20 MB');
+  const b64=await new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(String(r.result).split(',')[1]);r.onerror=no;r.readAsDataURL(file)});
+  const aman=file.name.replace(/[^\w.\-]+/g,'_').slice(-60), path='jobs/'+j.id+'/revisi/'+new Date().toISOString().replace(/[:.]/g,'-').slice(0,19)+'-'+aman;
+  toast('Mengunggah '+file.name+'…',8000);
+  try{ await gh('/contents/'+path,{method:'PUT',body:JSON.stringify({message:'revisi '+j.id+': '+file.name,content:b64,branch:cfg.branch||'main'})}) }
+  catch(e){ if(/403|Resource not accessible/i.test(e.message)) throw new Error('token GitHub perlu izin Contents: Read and write untuk mengunggah'); throw e }
+  return path }
 async function dispatch(wf,inputs){await gh('/actions/workflows/'+wf+'/dispatches',{method:'POST',body:JSON.stringify({ref:cfg.branch||'main',inputs})})}
 
 // ---------- naskah baru
