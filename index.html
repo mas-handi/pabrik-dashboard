@@ -89,6 +89,7 @@ html,body{overflow-x:hidden;max-width:100%}
 .ov.on{display:flex}
 .modal{background:var(--card);border:1px solid var(--line);border-radius:16px;width:100%;max-width:980px;padding:20px;position:relative}
 .modal.sm{max-width:620px}
+.sbup{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 10px}.sbup .btn{font-size:13px;padding:6px 10px}
 .x{position:absolute;right:14px;top:12px;background:none;border:none;font-size:22px;cursor:pointer;color:var(--mut)}
 h2{margin:0 0 14px;font-size:19px}h3{margin:18px 0 8px;font-size:14px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em}
 label{display:block;font-weight:600;margin:12px 0 6px}
@@ -528,8 +529,9 @@ async function detail(id){
   if(meta){const s=meta.short||{};h+='<h3>Judul &amp; caption</h3><div class="kv"><b>'+esc(s.judul||meta.judul)+'</b>\n\n'+esc(s.deskripsi||meta.deskripsi||'')+'</div>';
     if(meta.tags) h+='<div class="hint">Tag: '+esc(meta.tags.join(', '))+'</div>'}
   h=actionsSB(j)+h;
-  let sbr=null; if(sbmd){ sbr=await renderMD(sbmd); h+='<details '+((j.tahap||{}).storyboard==='tunggu'?'open':'')+' style="margin-top:14px"><summary style="cursor:pointer;font-weight:700">🗂 Storyboard</summary>'+
-      '<div class="act">'+(j.media&&j.media.storyboard_docx?'<button class="btn" data-a="sb_doc">⬇ Unduh Word</button>':'')+'<button class="btn" data-a="sb_md">⬇ Unduh teks (.md)</button></div>'+
+  let sbr=null; if(sbmd){ sbr=await renderMD(sbmd,j); h+='<details '+((j.tahap||{}).storyboard==='tunggu'?'open':'')+' style="margin-top:14px"><summary style="cursor:pointer;font-weight:700">🗂 Storyboard</summary>'+
+      '<div class="act">'+(j.media&&j.media.storyboard_zip?'<button class="btn pri" data-a="sb_zip">⬇ Unduh semua gambar (.zip)</button>':'')+(j.media&&j.media.storyboard_docx?'<button class="btn" data-a="sb_doc">⬇ Unduh Word</button>':'')+'<button class="btn" data-a="sb_md">⬇ Unduh teks (.md)</button></div>'+
+      (bisaRevGambar(j)?'<div class="hint">Edit gambar di AI lain tanpa mengganti nama berkasnya (mis. shot-05.png), lalu unggah lewat tombol di bawah tiap shot. Setelah itu tekan <b>Kirim revisi</b>.</div>':'')+
       '<div class="kv" style="white-space:normal">'+sbr.html+'</div></details>'; window._sbmd=sbmd }
   if(ring) h+='<h3>Yang dikembangkan Claude</h3><div class="kv">'+esc(ring)+'</div>';
   if(qc) h+='<h3>QC '+(qc.lulus?'✅ lulus':'❌ ada masalah')+'</h3><ul class="qc">'+qc.gagal.map(x=>'<li class="no">✗ '+esc(x)+'</li>').join('')+qc.ok.map(x=>'<li class="yes">✓ '+esc(x)+'</li>').join('')+'</ul>';
@@ -547,7 +549,7 @@ function actions(j){
   if(k==='menunggu') return '<h3>Keputusanmu</h3><div class="act"><div><label>Jadwal tayang</label><select id="aMode" onchange="document.getElementById(\'aWaktuBox\').style.display=this.value===\'manual\'?\'block\':\'none\'"><option value="auto">🎲 Otomatis (disarankan)</option><option value="manual">🕒 Pilih jam sendiri</option><option value="draf">📁 Draf private (atur di YouTube Studio)</option></select>'+
     '<div class="hint">Otomatis: hari kosong berikutnya, jam acak di jendela ramai (siang, pulang kerja, malam), makin pintar mengikuti views.</div>'+
     '<div id="aWaktuBox" style="display:none"><label>Jam tayang (WIB)</label><input type="datetime-local" id="aWaktu" value="'+nextSlot()+'"></div></div><button class="btn grn" data-a="setujui">✅ Setujui &amp; jadwalkan</button></div>'+
-    '<div class="act"><div><label>Minta revisi</label><textarea id="aRev" style="min-height:70px" placeholder="contoh: jeda heningnya lebih lama, tambahkan bapaknya menghela napas"></textarea><label style="margin-top:8px">Atau unggah dokumenmu (Word, PDF, teks, foto)</label><input type="file" id="fRev" accept=".docx,.pdf,.md,.txt,.png,.jpg,.jpeg,.webp"><div class="hint">Mis. storyboard versi editanmu — Claude memakainya sebagai acuan utama. Maks 20 MB.</div><label style="margin-top:8px">Gambar latar baru (opsional)</label><input type="file" id="lRev" multiple accept=".png,.jpg,.jpeg,.webp"><div class="hint">Latar dari AI lain. Beri nama berkas sesuai tempatnya (mis. <b>kantor.png</b>, <b>kondangan.jpg</b>) — nama itu jadi nama lokasi.</div><label style="margin-top:8px">Karakter / bagian tubuh (opsional)</label><input type="file" id="cRev" multiple accept=".png,.jpg,.jpeg,.webp"><div class="hint">Sprite tokoh atau contoh bagian (tangan, baju, rambut). Nama berkas = nama tokoh, mis. <b>SAYA.png</b> (mengganti tampilan Mas), <b>PAK HAJI.png</b> (tokoh baru), <b>tangan.png</b> (contoh bentuk tangan). Paling pas: piksel 32×48 latar transparan — <a href="template-karakter.png" target="_blank">lihat template</a>.</div><label style="margin-top:8px;display:flex;gap:8px;align-items:center;font-weight:600"><input type="checkbox" id="kRev" checked style="width:auto"> Revisi kecil — ubah hanya bagian yang kusebut (hemat kuota)</label><div class="hint">Matikan bila mengubah alur besar atau mengunggah storyboard baru.</div></div></div><div class="act"><button class="btn" data-a="revisi">✏️ Kirim revisi</button><button class="btn red" data-a="tolak">Tolak</button></div>';
+    '<div class="act"><div><label>Minta revisi</label><textarea id="aRev" style="min-height:70px" placeholder="contoh: jeda heningnya lebih lama, tambahkan bapaknya menghela napas"></textarea><label style="margin-top:8px">Atau unggah dokumenmu (Word, PDF, teks, foto)</label><input type="file" id="fRev" accept=".docx,.pdf,.md,.txt,.png,.jpg,.jpeg,.webp"><div class="hint">Mis. storyboard versi editanmu — Claude memakainya sebagai acuan utama. Maks 20 MB.</div><label style="margin-top:8px">Unggah beberapa gambar shot sekaligus</label><input type="file" id="gRev" multiple accept=".png,.jpg,.jpeg,.webp"><div class="hint">Nama berkas harus memuat nomor shot, mis. <b>shot-05.png</b> (sama seperti di zip).</div><label style="margin-top:8px">Gambar latar baru (opsional)</label><input type="file" id="lRev" multiple accept=".png,.jpg,.jpeg,.webp"><div class="hint">Latar dari AI lain. Beri nama berkas sesuai tempatnya (mis. <b>kantor.png</b>, <b>kondangan.jpg</b>) — nama itu jadi nama lokasi.</div><label style="margin-top:8px">Karakter / bagian tubuh (opsional)</label><input type="file" id="cRev" multiple accept=".png,.jpg,.jpeg,.webp"><div class="hint">Sprite tokoh atau contoh bagian (tangan, baju, rambut). Nama berkas = nama tokoh, mis. <b>SAYA.png</b> (mengganti tampilan Mas), <b>PAK HAJI.png</b> (tokoh baru), <b>tangan.png</b> (contoh bentuk tangan). Paling pas: piksel 32×48 latar transparan — <a href="template-karakter.png" target="_blank">lihat template</a>.</div><label style="margin-top:8px;display:flex;gap:8px;align-items:center;font-weight:600"><input type="checkbox" id="kRev" checked style="width:auto"> Revisi kecil — ubah hanya bagian yang kusebut (hemat kuota)</label><div class="hint">Matikan bila mengubah alur besar atau mengunggah storyboard baru.</div></div></div><div class="act"><button class="btn" data-a="revisi">✏️ Kirim revisi</button><button class="btn red" data-a="tolak">Tolak</button></div>';
   if(k==='gagal') return '<div class="act"><button class="btn" data-a="ulang">🔁 Produksi ulang</button></div>';
   return '';
 }
@@ -555,16 +557,52 @@ function actionsSB(j){
   if((j.tahap||{}).storyboard!=='tunggu') return '';
   return '<h3>Cek storyboard dulu</h3><div class="hint">Animasi baru dirender setelah kamu setuju. Baca storyboard di bawah (atau unduh versi Word).</div>'+
     '<div class="act"><button class="btn grn" data-a="sb_ok">✅ Storyboard oke — animasikan</button></div>'+
-    '<div class="act"><div><label>Revisi storyboard</label><textarea id="aSB" style="min-height:90px" placeholder="contoh: shot 5 Bu Kos jangan marah, buat senyum terus; potong adegan ojol; tambah jeda setelah saldo habis"></textarea><label style="margin-top:8px">Atau unggah dokumenmu (Word, PDF, teks, foto)</label><input type="file" id="fSB" accept=".docx,.pdf,.md,.txt,.png,.jpg,.jpeg,.webp"><div class="hint">Mis. storyboard versi editanmu — Claude memakainya sebagai acuan utama. Maks 20 MB.</div><label style="margin-top:8px">Gambar latar baru (opsional)</label><input type="file" id="lSB" multiple accept=".png,.jpg,.jpeg,.webp"><div class="hint">Latar dari AI lain. Beri nama berkas sesuai tempatnya (mis. <b>kantor.png</b>, <b>kondangan.jpg</b>) — nama itu jadi nama lokasi.</div><label style="margin-top:8px">Karakter / bagian tubuh (opsional)</label><input type="file" id="cSB" multiple accept=".png,.jpg,.jpeg,.webp"><div class="hint">Sprite tokoh atau contoh bagian (tangan, baju, rambut). Nama berkas = nama tokoh, mis. <b>SAYA.png</b> (mengganti tampilan Mas), <b>PAK HAJI.png</b> (tokoh baru), <b>tangan.png</b> (contoh bentuk tangan). Paling pas: piksel 32×48 latar transparan — <a href="template-karakter.png" target="_blank">lihat template</a>.</div><label style="margin-top:8px;display:flex;gap:8px;align-items:center;font-weight:600"><input type="checkbox" id="kSB" checked style="width:auto"> Revisi kecil — ubah hanya bagian yang kusebut (hemat kuota)</label><div class="hint">Matikan bila mengubah alur besar atau mengunggah storyboard baru.</div></div></div>'+
+    '<div class="act"><div><label>Revisi storyboard</label><textarea id="aSB" style="min-height:90px" placeholder="contoh: shot 5 Bu Kos jangan marah, buat senyum terus; potong adegan ojol; tambah jeda setelah saldo habis"></textarea><label style="margin-top:8px">Atau unggah dokumenmu (Word, PDF, teks, foto)</label><input type="file" id="fSB" accept=".docx,.pdf,.md,.txt,.png,.jpg,.jpeg,.webp"><div class="hint">Mis. storyboard versi editanmu — Claude memakainya sebagai acuan utama. Maks 20 MB.</div><label style="margin-top:8px">Unggah beberapa gambar shot sekaligus</label><input type="file" id="gSB" multiple accept=".png,.jpg,.jpeg,.webp"><div class="hint">Nama berkas harus memuat nomor shot, mis. <b>shot-05.png</b> (sama seperti di zip).</div><label style="margin-top:8px">Gambar latar baru (opsional)</label><input type="file" id="lSB" multiple accept=".png,.jpg,.jpeg,.webp"><div class="hint">Latar dari AI lain. Beri nama berkas sesuai tempatnya (mis. <b>kantor.png</b>, <b>kondangan.jpg</b>) — nama itu jadi nama lokasi.</div><label style="margin-top:8px">Karakter / bagian tubuh (opsional)</label><input type="file" id="cSB" multiple accept=".png,.jpg,.jpeg,.webp"><div class="hint">Sprite tokoh atau contoh bagian (tangan, baju, rambut). Nama berkas = nama tokoh, mis. <b>SAYA.png</b> (mengganti tampilan Mas), <b>PAK HAJI.png</b> (tokoh baru), <b>tangan.png</b> (contoh bentuk tangan). Paling pas: piksel 32×48 latar transparan — <a href="template-karakter.png" target="_blank">lihat template</a>.</div><label style="margin-top:8px;display:flex;gap:8px;align-items:center;font-weight:600"><input type="checkbox" id="kSB" checked style="width:auto"> Revisi kecil — ubah hanya bagian yang kusebut (hemat kuota)</label><div class="hint">Matikan bila mengubah alur besar atau mengunggah storyboard baru.</div></div></div>'+
     '<div class="act"><button class="btn" data-a="sb_rev">✏️ Kirim revisi storyboard</button></div>';
 }
+// ---------- revisi gambar per shot storyboard
+let sbUp={}; try{ sbUp=JSON.parse(localStorage.getItem('pp_sbup')||'{}') }catch(e){}
+const simpanSbUp=()=>{ try{localStorage.setItem('pp_sbup',JSON.stringify(sbUp))}catch(e){} };
+function bisaRevGambar(j){ return (j.tahap||{}).storyboard==='tunggu' || kat(j)==='menunggu' }
+async function unggahShot(j,key,file){
+  if(file.size>15e6) throw new Error('gambar lebih dari 15 MB');
+  const ext=(file.name.match(/\.(png|jpe?g|webp)$/i)||['.png'])[0].toLowerCase();
+  const path='jobs/'+j.id+'/revisi/gambar/'+key+'-'+new Date().toISOString().replace(/[:.]/g,'-').slice(0,19)+ext;
+  const b64=await new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(String(r.result).split(',')[1]);r.onerror=no;r.readAsDataURL(file)});
+  toast('Mengunggah '+key+'…',8000);
+  try{ await gh('/contents/'+path,{method:'PUT',body:JSON.stringify({message:'revisi gambar '+j.id+' '+key,content:b64,branch:cfg.branch||'main'})}) }
+  catch(e){ if(/403|Resource not accessible/i.test(e.message)) throw new Error('token GitHub perlu izin Contents: Read and write untuk mengunggah'); throw e }
+  (sbUp[j.id]=sbUp[j.id]||{})[key]=path; simpanSbUp(); return path }
+function kunciShot(nama){ const m=/(short[-_ ]?)?shot[-_ ]?0*(\d+)/i.exec(nama)||/^0*(\d+)/.exec(nama); if(!m) return null;
+  const n=String(m[2]||m[1]).padStart(2,'0'); return (m[2]&&m[1]?'short-':'')+'shot-'+n }
+function catatanGambarShot(j){
+  const L=Object.entries(sbUp[j.id]||{}).sort(); if(!L.length) return '';
+  return '\n\n## Gambar revisi per shot dari pemilik\n'+L.map(([k,p])=>'- '+k.replace('short-','Short ').replace('shot-','shot ')+': '+p).join('\n')+
+    '\nLihat tiap gambar dengan Read: itu tampilan yang DIINGINKAN pemilik untuk shot tersebut. Samakan komposisi, posisi & pose tangan/tokoh, benda, kamera, dan teks layar sedekat mungkin (lihat bagian "Gambar revisi per shot" di CLAUDE.md). Shot lain jangan diubah.' }
+document.addEventListener('change',async e=>{
+  const inp=e.target; if(!inp.matches('[data-sbup],#gSB,#gRev')) return;
+  const j=jobs.find(x=>x.id===openId); if(!j||!inp.files.length) return;
+  if(!live()){ toast('Mode demo: sambungkan repo di ⚙ Pengaturan dulu.'); inp.value=''; return }
+  const fs=[...inp.files];
+  for(const f of fs){
+    const key=inp.dataset.sbup||kunciShot(f.name);
+    if(!key){ toast('Nama berkas '+f.name+' tidak memuat nomor shot (mis. shot-05.png).',6000); continue }
+    try{ await unggahShot(j,key,f); const st=document.querySelector('.sbup[data-key="'+key+'"] .sbst'); if(st) st.textContent='✓ terunggah — ikut terkirim saat Kirim revisi' }
+    catch(err){ toast('Gagal: '+err.message,6000) } }
+  toast('Gambar terunggah. Tekan "Kirim revisi" bila semua sudah.',5000); inp.value='';
+});
 // render markdown storyboard (judul, gambar, tebal, daftar) — gambar diambil dari repo privat lewat token
-async function renderMD(md){
-  const out=[], imgs=[];
+async function renderMD(md,j){
+  const out=[], imgs=[]; let shot='', pre='';
   for(const line of md.split('\n')){
     let h=esc(line).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>');
+    if(line.startsWith('## ')) pre=/short/i.test(line)?'short-':'';
+    const sm=/^### Shot (\d+)/.exec(line); if(sm) shot=sm[1];
     const im=/^!\[(.*?)\]\((.+?)\)$/.exec(line);
-    if(im){ const id='sbimg'+imgs.length; imgs.push([id,im[2]]); out.push('<img id="'+id+'" alt="'+esc(im[1])+'" style="width:100%;max-width:640px;border-radius:8px;background:#000;min-height:60px;display:block;margin:6px 0">'); continue }
+    if(im){ const id='sbimg'+imgs.length; imgs.push([id,im[2]]); out.push('<img id="'+id+'" alt="'+esc(im[1])+'" style="width:100%;max-width:640px;border-radius:8px;background:#000;min-height:60px;display:block;margin:6px 0">');
+      if(j&&bisaRevGambar(j)&&shot){ const key=pre+'shot-'+shot, ada=(sbUp[j.id]||{})[key];
+        out.push('<div class="sbup" data-key="'+key+'"><label class="btn">⬆ Unggah revisi gambar '+(pre?'Short ':'')+'shot '+shot+'<input type="file" accept=".png,.jpg,.jpeg,.webp" data-sbup="'+key+'" hidden></label><span class="hint sbst">'+(ada?'✓ terunggah — ikut terkirim saat Kirim revisi':'')+'</span></div>') }
+      continue }
     if(line.startsWith('### ')) out.push('<h4 style="margin:18px 0 4px;font-size:15px">'+h.slice(4)+'</h4>');
     else if(line.startsWith('## ')) out.push('<h3>'+h.slice(3)+'</h3>');
     else if(line.startsWith('# ')) out.push('<h3 style="color:var(--txt);text-transform:none;letter-spacing:0;font-size:17px">'+h.slice(2)+'</h3>');
@@ -575,20 +613,22 @@ async function renderMD(md){
 }
 function bindActions(j){
   $('#dBody').querySelectorAll('[data-a]').forEach(b=>b.onclick=async()=>{
-    if(!live() && !/^sb_(md|doc)$/.test(b.dataset.a)) return toast('Mode demo: sambungkan repo di ⚙ Pengaturan untuk memakai tombol ini.');
+    if(!live() && !/^sb_(md|doc|zip)$/.test(b.dataset.a)) return toast('Mode demo: sambungkan repo di ⚙ Pengaturan untuk memakai tombol ini.');
     const a=b.dataset.a; b.disabled=true;
     try{
       if(a==='setujui'){ const m=$('#aMode').value; await dispatch('setujui.yml',{issue:String(j.issue),aksi:'setujui',tayang:m==='auto'?'auto':m==='draf'?'':($('#aWaktu').value||'auto')}) }
       if(a==='tolak'){if(!confirm('Tolak video ini?')){b.disabled=false;return} await dispatch('setujui.yml',{issue:String(j.issue),aksi:'tolak',tayang:''})}
-      if(a==='revisi'){const MODE=()=>$('#kRev').checked&&!$('#fRev').files.length?'kecil':'normal'; let c=$('#aRev').value.trim(); const f=$('#fRev').files[0], L=[...$('#lRev').files], KK=[...$('#cRev').files]; if(!c&&!f&&!L.length&&!KK.length){toast('Tulis catatan atau unggah dokumen revisinya.');b.disabled=false;return}
-        const bk=f?await unggah(j,f):''; c+=await catatanLatar(L); c+=await catatanKarakter(KK); await dispatch('produksi.yml',{issue:String(j.issue),catatan:c.trim(),berkas:bk,tahap:'naskah',mode:MODE()})}
+      if(a==='revisi'){const MODE=()=>$('#kRev').checked&&!$('#fRev').files.length?'kecil':'normal'; let c=$('#aRev').value.trim(); const f=$('#fRev').files[0], L=[...$('#lRev').files], KK=[...$('#cRev').files]; if(!c&&!f&&!L.length&&!KK.length&&!Object.keys(sbUp[j.id]||{}).length){toast('Tulis catatan atau unggah dokumen revisinya.');b.disabled=false;return}
+        const bk=f?await unggah(j,f):''; c+=await catatanLatar(L); c+=await catatanKarakter(KK); c+=catatanGambarShot(j); await dispatch('produksi.yml',{issue:String(j.issue),catatan:c.trim(),berkas:bk,tahap:'naskah',mode:MODE()})}
       if(a==='ulang') await dispatch('produksi.yml',{issue:String(j.issue),catatan:''});
       if(a==='sb_ok') await dispatch('produksi.yml',{issue:String(j.issue),catatan:'',tahap:'animasi'});
-      if(a==='sb_rev'){const MODE=()=>$('#kSB').checked&&!$('#fSB').files.length?'kecil':'normal'; let c=$('#aSB').value.trim(); const f=$('#fSB').files[0], L=[...$('#lSB').files], KK=[...$('#cSB').files]; if(!c&&!f&&!L.length&&!KK.length){toast('Tulis catatan atau unggah dokumen revisinya.');b.disabled=false;return}
-        const bk=f?await unggah(j,f):''; c+=await catatanLatar(L); c+=await catatanKarakter(KK); await dispatch('produksi.yml',{issue:String(j.issue),catatan:c.trim(),berkas:bk,tahap:'naskah',mode:MODE()})}
+      if(a==='sb_rev'){const MODE=()=>$('#kSB').checked&&!$('#fSB').files.length?'kecil':'normal'; let c=$('#aSB').value.trim(); const f=$('#fSB').files[0], L=[...$('#lSB').files], KK=[...$('#cSB').files]; if(!c&&!f&&!L.length&&!KK.length&&!Object.keys(sbUp[j.id]||{}).length){toast('Tulis catatan atau unggah dokumen revisinya.');b.disabled=false;return}
+        const bk=f?await unggah(j,f):''; c+=await catatanLatar(L); c+=await catatanKarakter(KK); c+=catatanGambarShot(j); await dispatch('produksi.yml',{issue:String(j.issue),catatan:c.trim(),berkas:bk,tahap:'naskah',mode:MODE()})}
       if(a==='sb_md'){ const x=document.createElement('a');x.href=URL.createObjectURL(new Blob([window._sbmd||''],{type:'text/markdown'}));x.download=j.id+'-storyboard.md';x.click(); b.disabled=false; return }
+      if(a==='sb_zip'){ const u=await media(j,'storyboard_zip'); if(u){const x=document.createElement('a');x.href=u;x.download=j.id+'-storyboard-gambar.zip';x.click()} b.disabled=false; return }
       if(a==='sb_doc'){ const u=await media(j,'storyboard_docx'); if(u){const x=document.createElement('a');x.href=u;x.download=j.id+'-storyboard.docx';x.click()} b.disabled=false; return }
       toast({setujui:'Disetujui. Upload berjalan; jam tayang muncul di tab Jadwal dalam 1–3 menit.',tolak:'Ditolak.',revisi:'Revisi dikirim. Claude mengerjakan ulang (±10 menit).',ulang:'Produksi diulang.',sb_ok:'Storyboard disetujui. Animasi mulai (±15 menit).',sb_rev:'Revisi dikirim. Claude memperbaiki naskah & storyboard (±10–30 menit).'}[a],5000);
+      if(a==='sb_rev'||a==='revisi'){ delete sbUp[j.id]; simpanSbUp() }
       setTimeout(refresh,4000);
     }catch(e){toast('Gagal: '+e.message,6000);b.disabled=false}
   });
